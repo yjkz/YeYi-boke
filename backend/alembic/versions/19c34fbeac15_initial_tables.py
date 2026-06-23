@@ -139,8 +139,3 @@ def downgrade() -> None:
     op.drop_table("tags")
     op.drop_table("categories")
     op.drop_table("users")
-
-    # Drop enums
-    op.execute("DROP TYPE IF EXISTS comment_status")
-    op.execute("DROP TYPE IF EXISTS post_status")
-    op.execute("DROP TYPE IF EXISTS user_role")
