@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.modules.posts.model import Post
-from app.modules.posts.schema import PostListItem
 
 
 async def search_posts(db: AsyncSession, query: str, offset: int = 0, limit: int = 10) -> tuple[list[Post], int]:
