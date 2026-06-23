@@ -43,7 +43,9 @@ admin_router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @admin_router.post("/upload")
-async def upload(file: UploadFile = File(...), _user: User = Depends(get_current_user)):
+async def upload(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
     try:
         url = await upload_image(file)
     except ValueError as e:

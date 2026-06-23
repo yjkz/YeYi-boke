@@ -1,6 +1,9 @@
 from contextlib import asynccontextmanager
 
+import os
+
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.database import engine, Base
@@ -32,6 +35,9 @@ app.include_router(comments_router, prefix="/api/v1")
 app.include_router(config_router, prefix="/api/v1")
 app.include_router(search_router, prefix="/api/v1")
 app.include_router(stats_router, prefix="/api/v1")
+
+os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
 
 @app.get("/health")
