@@ -1,0 +1,65 @@
+import type { Config } from 'tailwindcss'
+
+export default <Config>{
+  darkMode: 'class',
+  content: [
+    './components/**/*.{vue,js,ts}',
+    './layouts/**/*.vue',
+    './pages/**/*.vue',
+    './app.vue',
+  ],
+  theme: {
+    extend: {
+      fontFamily: {
+        brand: ['"Alimama FangYuanTi"', '"Microsoft YaHei"', '"PingFang SC"', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+      },
+      colors: {
+        rocom: {
+          bg: 'var(--rocom-bg)',
+          'bg-warm': 'var(--rocom-bg-warm)',
+          'bg-paper': 'var(--rocom-bg-paper)',
+          'bg-parchment': 'var(--rocom-bg-parchment)',
+          surface: 'var(--rocom-surface)',
+          'surface-paper': 'var(--rocom-surface-paper)',
+          'surface-strong': 'var(--rocom-surface-strong)',
+          'surface-muted': 'var(--rocom-surface-muted)',
+          text: 'var(--rocom-text)',
+          'text-strong': 'var(--rocom-text-strong)',
+          'text-secondary': 'var(--rocom-text-secondary)',
+          'text-muted': 'var(--rocom-text-muted)',
+          'text-caption': 'var(--rocom-text-caption)',
+          'text-disabled': 'var(--rocom-text-disabled)',
+          primary: 'var(--rocom-primary)',
+          'primary-soft': 'var(--rocom-primary-soft)',
+          'primary-strong': 'var(--rocom-primary-strong)',
+          'primary-outline': 'var(--rocom-primary-outline)',
+          'accent-orange': 'var(--rocom-accent-orange)',
+          'accent-blue': 'var(--rocom-accent-blue)',
+          outline: 'var(--rocom-outline)',
+          separator: 'var(--rocom-separator)',
+          control: 'var(--rocom-control)',
+          'control-strong': 'var(--rocom-control-strong)',
+          'control-hover': 'var(--rocom-control-hover)',
+          'nav-surface': 'var(--rocom-nav-surface)',
+        },
+      },
+      borderRadius: {
+        xs: '2px',
+        sm: '4px',
+        md: '6px',
+        lg: '8px',
+        xl: '10px',
+        '2xl': '12px',
+        pill: '999px',
+      },
+      boxShadow: {
+        sm: '0 2px 6px rgba(0,0,0,0.08)',
+        paper: '0 10px 26px rgba(83,58,35,0.08)',
+        lg: '0 14px 32px rgba(75,54,29,0.10)',
+        float: '0 26px 58px rgba(76,55,32,0.18)',
+      },
+    },
+  },
+  plugins: [],
+}
