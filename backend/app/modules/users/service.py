@@ -1,6 +1,11 @@
+import os
+import uuid
+
+from fastapi import UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.modules.users.model import User
 from app.utils.security import create_access_token, create_refresh_token, decode_token, hash_password, verify_password
 from app.redis_client import redis_client
@@ -53,3 +58,19 @@ async def refresh_access_token(db: AsyncSession, token: str) -> dict:
     tokens = create_tokens(user)
     await store_refresh_token(user_id, tokens["refresh_token"])
     return tokens
+
+
+async def upload_image(file: UploadFile) -> str:
+    ext = os.path.splitext(file.filename)[1] if file.filename else ".png"
+    filename = f"{uuid.uuid4().hex}{ext}"
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+    filepath = os.path.join(settings.UPLOAD_DIR, filename)
+
+    content = await file.read()
+    if len(content) > settings.MAX_UPLOAD_SIZE:
+        raise ValueError("File too large")
+
+    with open(filepath, "wb") as f:
+        f.write(content)
+
+    return f"/uploads/{filename}"
