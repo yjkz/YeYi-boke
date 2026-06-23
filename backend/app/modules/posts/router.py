@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies import Pagination, get_current_user
 from app.modules.users.model import User
 from app.modules.posts import service as post_service
+from app.modules.posts.rss import generate_rss
 from app.modules.posts.schema import (
     CategoryCreate, CategoryResponse, PostCreate, PostListResponse,
     PostResponse, PostUpdate, TagCreate, TagResponse,
@@ -45,6 +47,12 @@ async def list_categories(db: AsyncSession = Depends(get_db)):
 @router.get("/tags", response_model=list[TagResponse])
 async def list_tags(db: AsyncSession = Depends(get_db)):
     return await post_service.get_tags(db)
+
+
+@router.get("/rss.xml")
+async def rss(db: AsyncSession = Depends(get_db)):
+    xml = await generate_rss(db)
+    return Response(content=xml, media_type="application/rss+xml")
 
 
 # -- Admin --
