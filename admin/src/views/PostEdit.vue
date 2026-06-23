@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { postsApi, type PostCreate } from '@/api/posts'
+import api from '@/api/index'
 import { ElMessage } from 'element-plus'
 
 const route = useRoute()
@@ -51,6 +52,14 @@ const handleSave = async () => {
     loading.value = false
   }
 }
+
+const handleUpload = async (options: any) => {
+  const formData = new FormData()
+  formData.append('file', options.file)
+  const { data } = await api.post('/api/v1/admin/upload', formData)
+  form.value.content_md += `\n![${options.file.name}](${data.url})\n`
+  ElMessage.success('已上传')
+}
 </script>
 
 <template>
@@ -69,6 +78,11 @@ const handleSave = async () => {
         <el-input v-model="form.cover_image" />
       </el-form-item>
       <el-form-item label="内容 (Markdown)">
+        <div class="mb-2">
+          <el-upload :http-request="handleUpload" :show-file-list="false" accept="image/*">
+            <el-button size="small">上传图片</el-button>
+          </el-upload>
+        </div>
         <el-input v-model="form.content_md" type="textarea" :rows="20" />
       </el-form-item>
       <el-form-item>
