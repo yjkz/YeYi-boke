@@ -9,6 +9,8 @@ const page = ref(1)
 const statusFilter = ref('')
 const loading = ref(false)
 
+const statusMap: Record<string, string> = { pending: 'warning', approved: 'success', rejected: 'danger' }
+
 const fetchComments = async () => {
   loading.value = true
   try {
@@ -61,7 +63,7 @@ onMounted(fetchComments)
       <el-table-column prop="content" label="内容" min-width="200" show-overflow-tooltip />
       <el-table-column prop="status" label="状态" width="100">
         <template #default="{ row }">
-          <el-tag :type="{ pending: 'warning', approved: 'success', rejected: 'danger' }[row.status] as any" size="small">
+          <el-tag :type="(statusMap[row.status as keyof typeof statusMap] ?? 'info') as any" size="small">
             {{ statusLabel(row.status) }}
           </el-tag>
         </template>
