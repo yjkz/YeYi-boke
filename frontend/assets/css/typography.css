@@ -45,8 +45,8 @@
 }
 
 .prose pre {
-  background: #2D2A24;
-  color: #F4EEE1;
+  background: var(--code-bg);
+  color: var(--code-text);
   padding: 1em 1.5em;
   border-radius: 12px;
   overflow-x: auto;

@@ -1,8 +1,10 @@
+@import './typography.css';
+
 @font-face {
   font-family: "Alimama FangYuanTi";
-  src: url("~/assets/fonts/AlimamaFangYuanTiVF-Thin.woff2") format("woff2"),
-       url("~/assets/fonts/AlimamaFangYuanTiVF-Thin.woff") format("woff"),
-       url("~/assets/fonts/AlimamaFangYuanTiVF-Thin.ttf") format("truetype");
+  src: url("https://cdn.jsdelivr.net/npm/alimama-fangyuan-font@1.0.0/fonts/AlimamaFangYuanTiVF-Thin.woff2") format("woff2"),
+       url("https://cdn.jsdelivr.net/npm/alimama-fangyuan-font@1.0.0/fonts/AlimamaFangYuanTiVF-Thin.woff") format("woff"),
+       url("https://cdn.jsdelivr.net/npm/alimama-fangyuan-font@1.0.0/fonts/AlimamaFangYuanTiVF-Thin.ttf") format("truetype");
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
@@ -43,6 +45,8 @@
   --shadow-paper: 0 10px 26px rgba(83,58,35,0.08);
   --shadow-lg: 0 14px 32px rgba(75,54,29,0.10);
   --shadow-float: 0 26px 58px rgba(76,55,32,0.18);
+  --code-bg: #2D2A24;
+  --code-text: #F4EEE1;
 }
 
 .dark {
@@ -80,6 +84,8 @@
   --shadow-paper: 0 14px 32px rgba(0,0,0,0.24);
   --shadow-lg: 0 18px 42px rgba(0,0,0,0.32);
   --shadow-float: 0 28px 64px rgba(0,0,0,0.42);
+  --code-bg: #1E1A16;
+  --code-text: #F4EEE1;
 }
 
 body {
@@ -96,5 +102,3 @@ body {
     animation-duration: 0.01ms !important;
   }
 }
-
-@import './typography.css';

@@ -58,6 +58,6 @@ const submit = async () => {
 
 <style scoped>
 .input-field {
-  @apply px-3 py-2 text-sm rounded-lg bg-rocom-control border border-rocom-outline focus:outline-none focus:ring-2 focus:ring-rocom-primary/30 text-rocom-text placeholder:text-rocom-text-disabled;
+  @apply px-3 py-2 text-sm rounded-lg bg-rocom-control border border-rocom-outline focus:outline-none focus:ring-2 focus:ring-rocom-primary text-rocom-text placeholder:text-rocom-text-disabled;
 }
 </style>
