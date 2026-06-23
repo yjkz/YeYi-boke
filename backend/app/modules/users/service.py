@@ -50,4 +50,6 @@ async def refresh_access_token(db: AsyncSession, token: str) -> dict:
     if not user:
         raise ValueError("User not found")
 
-    return create_tokens(user)
+    tokens = create_tokens(user)
+    await store_refresh_token(user_id, tokens["refresh_token"])
+    return tokens
