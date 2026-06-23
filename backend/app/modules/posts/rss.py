@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from feedgen.feed import FeedGenerator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
