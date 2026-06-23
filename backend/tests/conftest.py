@@ -1,4 +1,3 @@
-import asyncio
 from typing import AsyncGenerator
 from unittest.mock import AsyncMock, patch
 
@@ -18,11 +17,17 @@ engine = create_async_engine(TEST_DATABASE_URL, echo=False)
 TestSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
+@pytest.fixture(autouse=True)
+def mock_redis():
+    with patch("app.modules.users.service.redis_client") as mock:
+        mock.set = AsyncMock()
+        mock.get = AsyncMock(return_value=None)
+        mock.delete = AsyncMock()
+        mock.pipeline.return_value = mock
+        mock.incr = AsyncMock()
+        mock.expire = AsyncMock()
+        mock.execute = AsyncMock(return_value=[None, None])
+        yield mock
 
 
 @pytest_asyncio.fixture(autouse=True)
@@ -71,14 +76,9 @@ async def admin_user(db: AsyncSession) -> User:
 
 @pytest_asyncio.fixture
 async def auth_headers(client: AsyncClient, admin_user: User) -> dict:
-    # Mock Redis calls so tests work without a Redis server
-    with patch("app.modules.users.service.redis_client") as mock_redis:
-        mock_redis.set = AsyncMock()
-        mock_redis.delete = AsyncMock()
-        mock_redis.get = AsyncMock(return_value=None)
-        resp = await client.post(
-            "/api/v1/auth/login",
-            json={"username": "admin", "password": "admin123"},
-        )
-        token = resp.json()["access_token"]
-        return {"Authorization": f"Bearer {token}"}
+    resp = await client.post(
+        "/api/v1/auth/login",
+        json={"username": "admin", "password": "admin123"},
+    )
+    token = resp.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
