@@ -1,0 +1,48 @@
+name: Deploy Blog
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull code
+        uses: actions/checkout@v4
+
+      - name: Login Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
+
+      - name: Build and push backend
+        run: |
+          docker build -t yjkz/yeyi-boke-backend:${{ github.sha }} -t yjkz/yeyi-boke-backend:latest ./backend
+          docker push yjkz/yeyi-boke-backend:${{ github.sha }}
+          docker push yjkz/yeyi-boke-backend:latest
+
+      - name: Build and push frontend
+        run: |
+          docker build -t yjkz/yeyi-boke-frontend:${{ github.sha }} -t yjkz/yeyi-boke-frontend:latest ./frontend
+          docker push yjkz/yeyi-boke-frontend:${{ github.sha }}
+          docker push yjkz/yeyi-boke-frontend:latest
+
+      - name: Build and push admin
+        run: |
+          docker build -t yjkz/yeyi-boke-admin:${{ github.sha }} -t yjkz/yeyi-boke-admin:latest ./admin
+          docker push yjkz/yeyi-boke-admin:${{ github.sha }}
+          docker push yjkz/yeyi-boke-admin:latest
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/Gitea/YeYi-boke
+            docker compose pull
+            docker compose up -d
