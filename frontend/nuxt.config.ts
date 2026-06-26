@@ -12,8 +12,9 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    apiBase: '',
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000',
+      apiBase: '/api',
     },
   },
 
