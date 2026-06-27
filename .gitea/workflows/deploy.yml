@@ -39,6 +39,7 @@ jobs:
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh -o StrictHostKeyChecking=no root@${{ secrets.SERVER_IP }} '
+            echo "${{ secrets.ACR_PASSWORD }}" | docker login --username=nick8473594517 --password-stdin crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com
             cd /home/Gitea/YeYi-boke
             docker compose pull
             docker compose up -d
