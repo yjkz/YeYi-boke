@@ -12,29 +12,26 @@ jobs:
       - name: Pull code
         uses: actions/checkout@v4
 
-      - name: Login Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASS }}
+      - name: Login ACR
+        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login --username=nick8473594517 --password-stdin crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com
 
       - name: Build and push backend
         run: |
-          docker build -t yjkz/yeyi-boke-backend:${{ github.sha }} -t yjkz/yeyi-boke-backend:latest ./backend
-          docker push yjkz/yeyi-boke-backend:${{ github.sha }}
-          docker push yjkz/yeyi-boke-backend:latest
+          docker build -t crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-backend:${{ github.sha }} -t crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-backend:latest ./backend
+          docker push crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-backend:${{ github.sha }}
+          docker push crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-backend:latest
 
       - name: Build and push frontend
         run: |
-          docker build -t yjkz/yeyi-boke-frontend:${{ github.sha }} -t yjkz/yeyi-boke-frontend:latest ./frontend
-          docker push yjkz/yeyi-boke-frontend:${{ github.sha }}
-          docker push yjkz/yeyi-boke-frontend:latest
+          docker build -t crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-frontend:${{ github.sha }} -t crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-frontend:latest ./frontend
+          docker push crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-frontend:${{ github.sha }}
+          docker push crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-frontend:latest
 
       - name: Build and push admin
         run: |
-          docker build -t yjkz/yeyi-boke-admin:${{ github.sha }} -t yjkz/yeyi-boke-admin:latest ./admin
-          docker push yjkz/yeyi-boke-admin:${{ github.sha }}
-          docker push yjkz/yeyi-boke-admin:latest
+          docker build -t crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-admin:${{ github.sha }} -t crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-admin:latest ./admin
+          docker push crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-admin:${{ github.sha }}
+          docker push crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-admin:latest
 
       - name: Deploy to server
         uses: appleboy/ssh-action@v1
