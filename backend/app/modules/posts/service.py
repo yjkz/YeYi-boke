@@ -15,10 +15,11 @@ async def get_posts(
     limit: int = 10,
     category_slug: str | None = None,
     tag_slug: str | None = None,
-    status: str = "published",
+    status: str | None = None,
 ):
     query = select(Post).options(selectinload(Post.category), selectinload(Post.tags))
-    query = query.where(Post.status == status)
+    if status:
+        query = query.where(Post.status == status)
     query = query.order_by(Post.is_top.desc(), Post.published_at.desc())
 
     if category_slug:
@@ -64,6 +65,7 @@ async def create_post(db: AsyncSession, data: PostCreate) -> Post:
     )
     db.add(post)
     await db.flush()
+    await db.refresh(post)
 
     if data.tag_ids:
         tags = (await db.execute(select(Tag).where(Tag.id.in_(data.tag_ids)))).scalars().all()

@@ -24,7 +24,7 @@ async def list_posts(
     tag: str | None = None,
     db: AsyncSession = Depends(get_db),
 ):
-    posts, total = await post_service.get_posts(db, offset=pagination.offset, limit=pagination.page_size, category_slug=category, tag_slug=tag)
+    posts, total = await post_service.get_posts(db, offset=pagination.offset, limit=pagination.page_size, category_slug=category, tag_slug=tag, status="published")
     return {"items": posts, "total": total, "page": pagination.page, "page_size": pagination.page_size}
 
 
@@ -56,6 +56,17 @@ async def rss(db: AsyncSession = Depends(get_db)):
 
 
 # -- Admin --
+
+@router.get("/admin/posts", response_model=PostListResponse)
+async def admin_list_posts(
+    pagination: Pagination = Depends(),
+    post_status: str | None = Query(None, alias="status"),
+    db: AsyncSession = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    posts, total = await post_service.get_posts(db, offset=pagination.offset, limit=pagination.page_size, status=post_status)
+    return {"items": posts, "total": total, "page": pagination.page, "page_size": pagination.page_size}
+
 
 @router.post("/admin/posts", response_model=PostResponse, status_code=status.HTTP_201_CREATED)
 async def create_post(data: PostCreate, db: AsyncSession = Depends(get_db), _user: User = Depends(get_current_user)):

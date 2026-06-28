@@ -5,6 +5,7 @@ export interface Post {
   title: string
   slug: string
   content_md: string | null
+  content_html: string | null
   excerpt: string | null
   cover_image: string | null
   status: string

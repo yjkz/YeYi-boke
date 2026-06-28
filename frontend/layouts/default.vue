@@ -1,6 +1,13 @@
 <script setup lang="ts">
 const { fetchConfig } = useSiteConfig()
+const { recordVisit } = useVisit()
+const route = useRoute()
+
 await fetchConfig()
+
+watch(() => route.fullPath, () => {
+  nextTick(() => recordVisit())
+}, { immediate: true })
 </script>
 
 <template>

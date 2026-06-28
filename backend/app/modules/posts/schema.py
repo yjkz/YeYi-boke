@@ -47,6 +47,7 @@ class PostResponse(BaseModel):
     id: int
     title: str
     slug: str
+    content_md: str | None
     content_html: str | None
     excerpt: str | None
     cover_image: str | None
@@ -74,6 +75,7 @@ class PostListItem(BaseModel):
     view_count: int
     is_top: bool
     created_at: datetime
+    updated_at: datetime
     published_at: datetime | None
 
     model_config = {"from_attributes": True}
