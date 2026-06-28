@@ -2,7 +2,107 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Alimama FangYuanTi";
+  src: url("https://cdn.jsdelivr.net/npm/alimama-fangyuan-font@1.0.0/fonts/AlimamaFangYuanTiVF-Thin.woff2") format("woff2"),
+       url("https://cdn.jsdelivr.net/npm/alimama-fangyuan-font@1.0.0/fonts/AlimamaFangYuanTiVF-Thin.woff") format("woff"),
+       url("https://cdn.jsdelivr.net/npm/alimama-fangyuan-font@1.0.0/fonts/AlimamaFangYuanTiVF-Thin.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --rocom-bg: #FFF6E0;
+  --rocom-bg-warm: #FAF6ED;
+  --rocom-bg-paper: #F4ECDC;
+  --rocom-bg-parchment: #EFE6D8;
+  --rocom-surface: #FFFFFFDB;
+  --rocom-surface-paper: #FAF7EEE0;
+  --rocom-surface-strong: #FFFCF7;
+  --rocom-surface-muted: #F9F7F2;
+  --rocom-text: #3D3528;
+  --rocom-text-strong: #1A1510;
+  --rocom-text-secondary: #7A7060;
+  --rocom-text-muted: #8B735B;
+  --rocom-text-caption: #9E8E76;
+  --rocom-text-disabled: #C8C0B0;
+  --rocom-primary: #F5BC00;
+  --rocom-primary-soft: #FFE8A3;
+  --rocom-primary-strong: #FFD460;
+  --rocom-primary-outline: #C89400;
+  --rocom-accent-orange: #D57F24;
+  --rocom-accent-blue: #2F6FDA;
+  --rocom-success: #388E3C;
+  --rocom-warning: #F57C00;
+  --rocom-danger: #D32F2F;
+  --rocom-info: #60A5FA;
+  --rocom-outline: #EDE9DF;
+  --rocom-separator: #8D6A4447;
+  --rocom-control: #FFFFFF9E;
+  --rocom-control-strong: #FFFFFFC7;
+  --rocom-control-hover: #FFFFFFEB;
+  --rocom-nav-surface: #FFFCF7EB;
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.08);
+  --shadow-paper: 0 10px 26px rgba(83,58,35,0.08);
+  --shadow-lg: 0 14px 32px rgba(75,54,29,0.10);
+  --shadow-float: 0 26px 58px rgba(76,55,32,0.18);
+}
+
+.dark {
+  --rocom-bg: #17120F;
+  --rocom-bg-warm: #1E1A16;
+  --rocom-bg-paper: #2A241E;
+  --rocom-bg-parchment: #342C23;
+  --rocom-surface: #322A1EDB;
+  --rocom-surface-paper: #2B241BEB;
+  --rocom-surface-strong: #3A3024;
+  --rocom-surface-muted: #3A3024C7;
+  --rocom-text: #F4EEE1;
+  --rocom-text-strong: #FFF8E8;
+  --rocom-text-secondary: #D2C2A8;
+  --rocom-text-muted: #A8A69F;
+  --rocom-text-caption: #918A7C;
+  --rocom-text-disabled: #6F685E;
+  --rocom-primary: #FFD460;
+  --rocom-primary-soft: #FFD46033;
+  --rocom-primary-strong: #FFE39A;
+  --rocom-primary-outline: #FFD460;
+  --rocom-accent-orange: #F6A14A;
+  --rocom-accent-blue: #93C5FD;
+  --rocom-success: #86EFAC;
+  --rocom-warning: #FBBF24;
+  --rocom-danger: #FCA5A5;
+  --rocom-info: #93C5FD;
+  --rocom-outline: #F4EEE129;
+  --rocom-separator: #F4EEE124;
+  --rocom-control: #3A3024A3;
+  --rocom-control-strong: #433729DB;
+  --rocom-control-hover: #524331EB;
+  --rocom-nav-surface: #221C15F0;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.22);
+  --shadow-paper: 0 14px 32px rgba(0,0,0,0.24);
+  --shadow-lg: 0 18px 42px rgba(0,0,0,0.32);
+  --shadow-float: 0 28px 64px rgba(0,0,0,0.42);
+}
+
 body {
   margin: 0;
-  font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  font-family: "Alimama FangYuanTi", "Microsoft YaHei", "PingFang SC", sans-serif;
+  background-color: var(--rocom-bg);
+  color: var(--rocom-text);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Element Plus 主题覆盖 */
+.el-button--primary {
+  --el-button-bg-color: var(--rocom-primary) !important;
+  --el-button-border-color: var(--rocom-primary-outline) !important;
+  --el-button-text-color: var(--rocom-text-strong) !important;
+  --el-button-hover-bg-color: var(--rocom-primary-strong) !important;
+  --el-button-hover-border-color: var(--rocom-primary-strong) !important;
+}
+
+.el-menu {
+  border-right: none !important;
 }

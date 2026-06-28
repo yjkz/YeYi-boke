@@ -22,14 +22,14 @@ onMounted(fetchTrend)
       </el-radio-group>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-6">
-      <h3 class="text-lg font-semibold mb-4">访问趋势</h3>
+    <div class="bg-rocom-surface-paper rounded-2xl shadow-paper border border-rocom-outline p-6">
+      <h3 class="text-lg font-semibold mb-4 text-rocom-text-strong">访问趋势</h3>
       <el-table :data="trend" stripe>
         <el-table-column prop="date" label="日期" />
         <el-table-column prop="page_views" label="PV" />
         <el-table-column prop="unique_visitors" label="UV" />
       </el-table>
-      <p v-if="!trend.length" class="text-gray-400 text-center py-8">暂无数据</p>
+      <p v-if="!trend.length" class="text-rocom-text-disabled text-center py-8">暂无数据</p>
     </div>
   </div>
 </template>

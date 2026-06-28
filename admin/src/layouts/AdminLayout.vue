@@ -23,18 +23,23 @@ const menuItems = [
 
 <template>
   <el-container class="h-screen">
-    <el-aside width="220px" class="bg-gray-900">
-      <div class="h-16 flex items-center justify-center text-white font-bold text-lg">
+    <el-aside width="220px" class="bg-rocom-bg-parchment border-r border-rocom-outline">
+      <div class="h-16 flex items-center justify-center font-bold text-lg text-rocom-text-strong tracking-wider">
         YeYi 管理后台
       </div>
       <el-menu
         :default-active="$route.path"
         router
-        background-color="#111827"
-        text-color="#9CA3AF"
-        active-text-color="#F5BC00"
+        background-color="transparent"
+        text-color="var(--rocom-text-secondary)"
+        active-text-color="var(--rocom-primary-outline)"
       >
-        <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
+        <el-menu-item
+          v-for="item in menuItems"
+          :key="item.path"
+          :index="item.path"
+          class="hover:bg-rocom-control-hover"
+        >
           <span class="mr-2">{{ item.icon }}</span>
           <span>{{ item.label }}</span>
         </el-menu-item>
@@ -42,15 +47,15 @@ const menuItems = [
     </el-aside>
 
     <el-container>
-      <el-header class="h-16 flex items-center justify-between border-b bg-white px-6">
-        <h2 class="text-lg font-semibold text-gray-800">{{ $route.name }}</h2>
+      <el-header class="h-16 flex items-center justify-between border-b border-rocom-outline bg-rocom-surface-paper px-6">
+        <h2 class="text-lg font-semibold text-rocom-text-strong">{{ $route.name }}</h2>
         <div class="flex items-center gap-4">
-          <span class="text-sm text-gray-600">{{ auth.user?.username }}</span>
+          <span class="text-sm text-rocom-text-secondary">{{ auth.user?.username }}</span>
           <el-button size="small" @click="logout">退出</el-button>
         </div>
       </el-header>
 
-      <el-main class="bg-gray-50 p-6">
+      <el-main class="bg-rocom-bg p-6">
         <router-view />
       </el-main>
     </el-container>
