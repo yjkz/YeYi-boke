@@ -7,7 +7,7 @@ services:
     image: crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-backend:latest
     container_name: yeyi_blog_backend
     environment:
-      - DATABASE_URL=mysql+asyncmy://root:root@mysql:3306/yeyi_blog
+      - DATABASE_URL=mysql+asyncmy://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/yeyi_blog
       - REDIS_URL=redis://redis:6379/0
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     depends_on:
