@@ -10,3 +10,4 @@ build/
 .env.local
 *.db
 *.sqlite3
+CLAUDE.md

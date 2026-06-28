@@ -33,6 +33,14 @@ jobs:
           docker push crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-admin:${{ github.sha }}
           docker push crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-admin:latest
 
+      - name: Copy deploy files to server
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          scp -o StrictHostKeyChecking=no deploy/docker-compose.prod.yml deploy/gateway.conf root@${{ secrets.SERVER_IP }}:/home/Gitea/YeYi-boke/
+          rm -f ~/.ssh/id_ed25519
+
       - name: Deploy to server
         run: |
           mkdir -p ~/.ssh
@@ -41,6 +49,9 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@${{ secrets.SERVER_IP }} '
             echo "${{ secrets.ACR_PASSWORD }}" | docker login --username=nick8473594517 --password-stdin crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com
             cd /home/Gitea/YeYi-boke
-            docker compose pull
-            docker compose up -d
+            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" > .env
+            echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
           '
+          rm -f ~/.ssh/id_ed25519

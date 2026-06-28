@@ -45,7 +45,7 @@ async def refresh_access_token(db: AsyncSession, token: str) -> dict:
     except Exception:
         raise ValueError("Invalid refresh token")
 
-    user_id = payload.get("sub")
+    user_id = int(payload.get("sub", 0))
     stored = await redis_client.get(f"refresh_token:{user_id}")
     if stored != token:
         raise ValueError("Refresh token revoked")
