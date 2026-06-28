@@ -10,16 +10,17 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "markdown-it": "^14.1.0",
     "katex": "^0.16.22",
+    "lucide-vue-next": "^1.0.0",
+    "markdown-it": "^14.1.0",
     "prismjs": "^1.29.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
-    "@nuxtjs/tailwindcss": "^6.13.1",
     "@nuxtjs/color-mode": "^3.5.2",
     "@nuxtjs/google-fonts": "^3.2.0",
+    "@nuxtjs/tailwindcss": "^6.13.1",
     "@types/markdown-it": "^14.1.2",
     "@types/prismjs": "^1.26.6",
     "nuxt": "^3.17.5",

@@ -14,7 +14,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     apiBase: '',
     public: {
-      apiBase: '/api',
+      apiBase: '/api/v1',
     },
   },
 
@@ -32,16 +32,11 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#FFF6E0' },
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-        // Preconnect to CDN for font loading performance
-        { rel: 'dns-prefetch', href: 'https://cdn.jsdelivr.net' },
-        { rel: 'preconnect', href: 'https://cdn.jsdelivr.net', crossorigin: '' },
-        // Preload the primary font (woff2) for faster first paint
         {
           rel: 'preload',
-          href: 'https://cdn.jsdelivr.net/npm/alimama-fangyuan-font@1.0.0/fonts/AlimamaFangYuanTiVF-Thin.woff2',
+          href: '/fonts/AlimamaFangYuanTi.otf',
           as: 'font',
-          type: 'font/woff2',
+          type: 'font/otf',
           crossorigin: '',
         },
       ],

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Menu, X, Rss } from 'lucide-vue-next'
+
 const { siteConfig } = useSiteConfig()
 const route = useRoute()
 const mobileMenuOpen = ref(false)
@@ -14,52 +16,85 @@ const navLinks = [
 
 <template>
   <header class="sticky top-0 z-50 bg-rocom-nav-surface backdrop-blur-sm border-b border-rocom-outline">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-rocom-primary focus:text-rocom-text-strong focus:rounded-lg">
+      跳到主要内容
+    </a>
+
     <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
       <NuxtLink to="/" class="text-xl font-bold text-rocom-text-strong tracking-wider">
         {{ siteConfig?.site_title || 'YeYi 的博客' }}
       </NuxtLink>
 
-      <nav class="hidden md:flex items-center gap-6">
+      <nav class="hidden md:flex items-center gap-1" aria-label="主导航">
         <NuxtLink
           v-for="link in navLinks"
           :key="link.path"
           :to="link.path"
-          class="text-sm font-medium text-rocom-text-secondary hover:text-rocom-primary transition-colors"
-          :class="{ 'text-rocom-primary': route.path === link.path }"
+          class="px-3 py-2 text-sm font-medium text-rocom-text-secondary hover:text-rocom-primary transition-colors rounded-lg hover:bg-rocom-control"
+          :class="{ 'text-rocom-primary bg-rocom-primary-soft': route.path === link.path }"
         >
           {{ link.label }}
         </NuxtLink>
         <SearchBox />
-        <a href="/api/v1/rss.xml" target="_blank" class="text-rocom-text-secondary hover:text-rocom-primary transition-colors" title="RSS 订阅">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/></svg>
+        <a
+          href="/api/v1/rss.xml"
+          target="_blank"
+          class="w-11 h-11 flex items-center justify-center text-rocom-text-secondary hover:text-rocom-primary transition-colors rounded-lg hover:bg-rocom-control"
+          aria-label="RSS 订阅"
+        >
+          <Rss :size="18" />
         </a>
         <DarkToggle />
       </nav>
 
-      <button class="md:hidden text-rocom-text" @click="mobileMenuOpen = !mobileMenuOpen">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path v-if="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
+      <button
+        class="md:hidden w-11 h-11 flex items-center justify-center text-rocom-text rounded-lg hover:bg-rocom-control transition-colors"
+        @click="mobileMenuOpen = !mobileMenuOpen"
+        :aria-label="mobileMenuOpen ? '关闭菜单' : '打开菜单'"
+        :aria-expanded="mobileMenuOpen"
+      >
+        <Menu v-if="!mobileMenuOpen" :size="22" />
+        <X v-else :size="22" />
       </button>
     </div>
 
-    <div v-if="mobileMenuOpen" class="md:hidden border-t border-rocom-outline bg-rocom-surface-paper">
-      <nav class="flex flex-col p-4 gap-3">
-        <NuxtLink
-          v-for="link in navLinks"
-          :key="link.path"
-          :to="link.path"
-          class="text-sm font-medium text-rocom-text-secondary hover:text-rocom-primary py-2"
-          @click="mobileMenuOpen = false"
-        >
-          {{ link.label }}
-        </NuxtLink>
-        <div class="flex items-center gap-3 pt-2 border-t border-rocom-outline">
-          <SearchBox />
-          <DarkToggle />
-        </div>
-      </nav>
-    </div>
+    <Transition name="slide-down">
+      <div v-if="mobileMenuOpen" class="md:hidden border-t border-rocom-outline bg-rocom-surface-paper">
+        <nav class="flex flex-col p-4 gap-1" aria-label="移动端导航">
+          <NuxtLink
+            v-for="link in navLinks"
+            :key="link.path"
+            :to="link.path"
+            class="px-3 py-3 text-sm font-medium text-rocom-text-secondary hover:text-rocom-primary hover:bg-rocom-control rounded-lg transition-colors"
+            :class="{ 'text-rocom-primary bg-rocom-primary-soft': route.path === link.path }"
+            @click="mobileMenuOpen = false"
+          >
+            {{ link.label }}
+          </NuxtLink>
+          <div class="flex items-center gap-2 pt-2 mt-2 border-t border-rocom-outline">
+            <SearchBox />
+            <a
+              href="/api/v1/rss.xml"
+              target="_blank"
+              class="w-11 h-11 flex items-center justify-center text-rocom-text-secondary hover:text-rocom-primary transition-colors rounded-lg"
+              aria-label="RSS 订阅"
+            >
+              <Rss :size="18" />
+            </a>
+            <DarkToggle />
+          </div>
+        </nav>
+      </div>
+    </Transition>
   </header>
 </template>
+
+<style scoped>
+.slide-down-enter-active, .slide-down-leave-active {
+  transition: all 0.2s ease-out;
+}
+.slide-down-enter-from, .slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+</style>

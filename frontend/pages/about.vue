@@ -1,11 +1,26 @@
 <script setup lang="ts">
+import MarkdownIt from 'markdown-it'
+
+const api = useApi()
+const md = new MarkdownIt({ html: false, linkify: true, typographer: true })
+
 useHead({ title: '关于' })
+
+const { data: config } = await useAsyncData(
+  'about-config',
+  () => api.get('/site/config')
+)
+
+const aboutHtml = computed(() => {
+  const content = config.value?.about_content
+  return content ? md.render(content) : ''
+})
 </script>
 
 <template>
   <div class="prose max-w-none">
     <h1>关于</h1>
-    <p>这是 YeYi 的个人博客，记录生活与代码。</p>
-    <p>使用 Nuxt 3 + FastAPI 构建，采用洛克魔法书设计风格。</p>
+    <div v-if="aboutHtml" v-html="aboutHtml" />
+    <p v-else class="text-rocom-text-muted">暂无内容</p>
   </div>
 </template>

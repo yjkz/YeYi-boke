@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Sun, Moon } from 'lucide-vue-next'
+
 const colorMode = useColorMode()
 const toggle = () => {
   colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
@@ -8,10 +10,10 @@ const toggle = () => {
 <template>
   <button
     @click="toggle"
-    class="w-9 h-9 rounded-full flex items-center justify-center bg-rocom-control hover:bg-rocom-control-hover transition-colors"
-    :title="colorMode.value === 'dark' ? '切换亮色' : '切换暗色'"
+    class="w-11 h-11 rounded-full flex items-center justify-center bg-rocom-control hover:bg-rocom-control-hover transition-colors"
+    :aria-label="colorMode.value === 'dark' ? '切换亮色模式' : '切换暗色模式'"
   >
-    <span v-if="colorMode.value === 'dark'" class="text-lg">☀️</span>
-    <span v-else class="text-lg">🌙</span>
+    <Sun v-if="colorMode.value === 'dark'" :size="18" class="text-rocom-text-secondary" />
+    <Moon v-else :size="18" class="text-rocom-text-secondary" />
   </button>
 </template>

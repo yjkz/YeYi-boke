@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const api = useApi()
 useHead({ title: '分类' })
-const { data: categories } = await useAsyncData('categories', () => api.get('/api/v1/categories'))
+const { data: categories } = await useAsyncData('categories', () => api.get('/categories'))
 </script>
 
 <template>

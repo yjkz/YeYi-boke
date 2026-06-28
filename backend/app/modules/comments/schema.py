@@ -16,6 +16,19 @@ class CommentUpdate(BaseModel):
     status: str = Field(..., pattern="^(approved|rejected)$")
 
 
+class CommentReplyResponse(BaseModel):
+    id: int
+    post_id: int
+    parent_id: int | None
+    nickname: str
+    website: str | None
+    content: str
+    status: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
 class CommentResponse(BaseModel):
     id: int
     post_id: int
@@ -25,7 +38,20 @@ class CommentResponse(BaseModel):
     content: str
     status: str
     created_at: datetime
-    replies: list["CommentResponse"] = []
+    replies: list[CommentReplyResponse] = []
+
+    model_config = {"from_attributes": True}
+
+
+class CommentCreateResponse(BaseModel):
+    id: int
+    post_id: int
+    parent_id: int | None
+    nickname: str
+    website: str | None
+    content: str
+    status: str
+    created_at: datetime
 
     model_config = {"from_attributes": True}
 

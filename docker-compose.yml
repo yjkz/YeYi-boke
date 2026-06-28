@@ -14,9 +14,13 @@ services:
       - DATABASE_URL=mysql+asyncmy://root:root@mysql:3306/yeyi_blog
       - REDIS_URL=redis://redis:6379/0
       - JWT_SECRET_KEY=change-me-in-production
+    volumes:
+      - uploads_data:/backend/uploads
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   frontend:
     build:
@@ -24,7 +28,7 @@ services:
       dockerfile: Dockerfile
     container_name: yeyi_blog_frontend
     environment:
-      - NUXT_API_BASE=http://backend:8000
+      - NUXT_API_BASE=http://backend:8000/api/v1
       
   gateway:
     image: nginx:alpine
@@ -48,15 +52,26 @@ services:
       MYSQL_DATABASE: yeyi_blog
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
-     image: redis:7-alpine
-     container_name: redis
-     ports:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
       - "6379:6379"
-     volumes:
-        - redis_data:/data/redis
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 volumes:
   mysql_data:
   redis_data:
+  uploads_data:
   

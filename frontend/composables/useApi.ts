@@ -1,6 +1,8 @@
 export function useApi() {
   const config = useRuntimeConfig()
-  const baseURL = config.apiBase || config.public.apiBase
+  const baseURL = import.meta.server
+    ? (config.apiBase || config.public.apiBase)
+    : config.public.apiBase
 
   return {
     get: <T>(url: string, params?: Record<string, any>) =>

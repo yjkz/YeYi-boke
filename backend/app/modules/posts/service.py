@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 from app.modules.posts.model import Category, Post, Tag, post_tags
 from app.modules.posts.schema import PostCreate, PostUpdate
 from app.utils.markdown import render_markdown
+from app.utils.slug import generate_slug
 
 
 async def get_posts(
@@ -44,18 +45,29 @@ async def get_post_by_slug(db: AsyncSession, slug: str) -> Post | None:
     return result.scalar_one_or_none()
 
 
+async def get_post_by_id(db: AsyncSession, post_id: int) -> Post | None:
+    result = await db.execute(
+        select(Post)
+        .options(selectinload(Post.category), selectinload(Post.tags))
+        .where(Post.id == post_id)
+    )
+    return result.scalar_one_or_none()
+
+
 async def increment_view_count(db: AsyncSession, post: Post) -> None:
     post.view_count += 1
     await db.flush()
+    await db.refresh(post)
 
 
 async def create_post(db: AsyncSession, data: PostCreate) -> Post:
+    slug = data.slug or generate_slug(data.title)
     content_html = render_markdown(data.content_md) if data.content_md else ""
     excerpt = data.excerpt or (data.content_md[:200] if data.content_md else "")
 
     post = Post(
         title=data.title,
-        slug=data.slug,
+        slug=slug,
         content_md=data.content_md,
         content_html=content_html,
         excerpt=excerpt,
@@ -77,7 +89,7 @@ async def create_post(db: AsyncSession, data: PostCreate) -> Post:
 
 async def update_post(db: AsyncSession, post_id: int, data: PostUpdate) -> Post | None:
     result = await db.execute(
-        select(Post).options(selectinload(Post.tags)).where(Post.id == post_id)
+        select(Post).options(selectinload(Post.category), selectinload(Post.tags)).where(Post.id == post_id)
     )
     post = result.scalar_one_or_none()
     if not post:
@@ -99,7 +111,7 @@ async def update_post(db: AsyncSession, post_id: int, data: PostUpdate) -> Post 
         post.tags = tags
 
     await db.flush()
-    await db.refresh(post, ["category", "tags"])
+    await db.refresh(post)
     return post
 
 
@@ -123,7 +135,7 @@ async def publish_post(db: AsyncSession, post_id: int) -> Post | None:
     post.status = "published"
     post.published_at = datetime.now(timezone.utc)
     await db.flush()
-    await db.refresh(post, ["category", "tags"])
+    await db.refresh(post)
     return post
 
 
@@ -136,7 +148,7 @@ async def draft_post(db: AsyncSession, post_id: int) -> Post | None:
         return None
     post.status = "draft"
     await db.flush()
-    await db.refresh(post, ["category", "tags"])
+    await db.refresh(post)
     return post
 
 
@@ -149,7 +161,32 @@ async def create_category(db: AsyncSession, name: str, slug: str, description: s
     category = Category(name=name, slug=slug, description=description, sort_order=sort_order)
     db.add(category)
     await db.flush()
+    await db.refresh(category)
     return category
+
+
+async def update_category(db: AsyncSession, category_id: int, name: str, slug: str, description: str | None = None, sort_order: int = 0) -> Category | None:
+    result = await db.execute(select(Category).where(Category.id == category_id))
+    category = result.scalar_one_or_none()
+    if not category:
+        return None
+    category.name = name
+    category.slug = slug
+    category.description = description
+    category.sort_order = sort_order
+    await db.flush()
+    await db.refresh(category)
+    return category
+
+
+async def delete_category(db: AsyncSession, category_id: int) -> bool:
+    result = await db.execute(select(Category).where(Category.id == category_id))
+    category = result.scalar_one_or_none()
+    if not category:
+        return False
+    await db.delete(category)
+    await db.flush()
+    return True
 
 
 async def get_tags(db: AsyncSession) -> list[Tag]:
@@ -161,4 +198,27 @@ async def create_tag(db: AsyncSession, name: str, slug: str) -> Tag:
     tag = Tag(name=name, slug=slug)
     db.add(tag)
     await db.flush()
+    await db.refresh(tag)
     return tag
+
+
+async def update_tag(db: AsyncSession, tag_id: int, name: str, slug: str) -> Tag | None:
+    result = await db.execute(select(Tag).where(Tag.id == tag_id))
+    tag = result.scalar_one_or_none()
+    if not tag:
+        return None
+    tag.name = name
+    tag.slug = slug
+    await db.flush()
+    await db.refresh(tag)
+    return tag
+
+
+async def delete_tag(db: AsyncSession, tag_id: int) -> bool:
+    result = await db.execute(select(Tag).where(Tag.id == tag_id))
+    tag = result.scalar_one_or_none()
+    if not tag:
+        return False
+    await db.delete(tag)
+    await db.flush()
+    return True

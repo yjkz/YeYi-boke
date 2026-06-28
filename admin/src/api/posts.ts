@@ -20,7 +20,7 @@ export interface Post {
 
 export interface PostCreate {
   title: string
-  slug: string
+  slug?: string
   content_md: string
   excerpt?: string
   cover_image?: string
@@ -30,8 +30,9 @@ export interface PostCreate {
 }
 
 export const postsApi = {
-  list: (params?: any) => api.get<{ items: Post[]; total: number }>('/api/v1/posts', { params }),
+  list: (params?: any) => api.get<{ items: Post[]; total: number }>('/api/v1/admin/posts', { params }),
   get: (slug: string) => api.get<Post>(`/api/v1/posts/${slug}`),
+  getById: (id: number) => api.get<Post>(`/api/v1/admin/posts/${id}`),
   create: (data: PostCreate) => api.post<Post>('/api/v1/admin/posts', data),
   update: (id: number, data: Partial<PostCreate>) => api.put<Post>(`/api/v1/admin/posts/${id}`, data),
   delete: (id: number) => api.delete(`/api/v1/admin/posts/${id}`),

@@ -9,7 +9,7 @@ useHead({ title: computed(() => query.value ? `搜索: ${query.value}` : '搜索
 
 const { data: results } = await useAsyncData(
   `search-${query.value}-${page.value}`,
-  () => query.value ? api.get('/api/v1/search', { q: query.value, page: page.value }) : null,
+  () => query.value ? api.get('/search', { q: query.value, page: page.value }) : null,
   { watch: [query, page] }
 )
 

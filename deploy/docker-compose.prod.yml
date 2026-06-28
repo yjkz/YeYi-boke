@@ -10,6 +10,8 @@ services:
       - DATABASE_URL=mysql+asyncmy://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/yeyi_blog
       - REDIS_URL=redis://redis:6379/0
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    volumes:
+      - uploads_data:/backend/uploads
     depends_on:
       mysql:
         condition: service_healthy
@@ -20,7 +22,7 @@ services:
     image: crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-frontend:latest
     container_name: yeyi_blog_frontend
     environment:
-      - NUXT_API_BASE=http://backend:8000
+      - NUXT_API_BASE=http://backend:8000/api/v1
 
   gateway:
     image: nginx:alpine
@@ -62,3 +64,4 @@ services:
 volumes:
   mysql_data:
   redis_data:
+  uploads_data:

@@ -5,7 +5,7 @@ const slug = route.params.slug as string
 
 const { data: post } = await useAsyncData(
   `post-${slug}`,
-  () => api.get(`/api/v1/posts/${slug}`)
+  () => api.get(`/posts/${slug}`)
 )
 
 if (!post.value) {

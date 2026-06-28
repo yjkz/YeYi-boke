@@ -16,7 +16,7 @@ export function useSiteConfig() {
 
   const fetchConfig = async () => {
     if (!siteConfig.value) {
-      siteConfig.value = await api.get<SiteConfig>('/api/v1/site/config')
+      siteConfig.value = await api.get<SiteConfig>('/site/config')
     }
     return siteConfig.value
   }

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import require_admin
 from app.modules.stats import service as stats_service
 from app.modules.stats.schema import StatsOverview, StatsTrendResponse, VisitRequest
 from app.modules.users.model import User
@@ -23,11 +23,11 @@ async def record_visit(body: VisitRequest, request: Request, db: AsyncSession = 
 
 
 @router.get("/admin/stats", response_model=StatsOverview)
-async def get_overview(db: AsyncSession = Depends(get_db), _user: User = Depends(get_current_user)):
+async def get_overview(db: AsyncSession = Depends(get_db), _user: User = Depends(require_admin)):
     return await stats_service.get_stats_overview(db)
 
 
 @router.get("/admin/stats/trend", response_model=StatsTrendResponse)
-async def get_trend(days: int = Query(7, ge=1, le=90), db: AsyncSession = Depends(get_db), _user: User = Depends(get_current_user)):
+async def get_trend(days: int = Query(7, ge=1, le=90), db: AsyncSession = Depends(get_db), _user: User = Depends(require_admin)):
     data = await stats_service.get_stats_trend(db, days)
     return {"data": data}

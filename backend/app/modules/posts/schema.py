@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 class PostCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
-    slug: str = Field(..., min_length=1, max_length=200)
+    slug: str = Field(default="", max_length=200)
     content_md: str = ""
     excerpt: str | None = None
     cover_image: str | None = None

@@ -6,6 +6,7 @@ class SiteConfigResponse(BaseModel):
     site_subtitle: str = ""
     logo_url: str = ""
     favicon_url: str = ""
+    about_content: str = ""
     footer_text: str = ""
     social_links: dict = {}
     comment_enabled: bool = True
@@ -19,6 +20,7 @@ class SiteConfigUpdate(BaseModel):
     site_subtitle: str | None = None
     logo_url: str | None = None
     favicon_url: str | None = None
+    about_content: str | None = None
     footer_text: str | None = None
     social_links: dict | None = None
     comment_enabled: bool | None = None

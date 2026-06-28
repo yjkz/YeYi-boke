@@ -3,7 +3,7 @@ const api = useApi()
 useHead({ title: '归档' })
 
 const { data: postsData } = await useAsyncData('archive', () =>
-  api.get('/api/v1/posts', { page_size: 100 })
+  api.get('/posts', { page_size: 100 })
 )
 
 const grouped = computed(() => {

@@ -4,13 +4,13 @@ const api = useApi()
 
 const { data: comments, refresh } = await useAsyncData(
   `comments-${props.postSlug}`,
-  () => api.get(`/api/v1/posts/${props.postSlug}/comments`)
+  () => api.get(`/posts/${props.postSlug}/comments`)
 )
 </script>
 
 <template>
-  <section class="mt-12 border-t border-rocom-outline pt-8">
-    <h2 class="text-lg font-bold text-rocom-text-strong mb-6">评论</h2>
+  <section class="mt-12 border-t border-rocom-outline pt-8" aria-label="评论区">
+    <h2 class="text-lg font-bold text-rocom-text-strong mb-6">评论 ({{ comments?.length || 0 }})</h2>
 
     <div v-if="comments?.length" class="divide-y divide-rocom-outline">
       <CommentItem v-for="c in comments" :key="c.id" :comment="c" />

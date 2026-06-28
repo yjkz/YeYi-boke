@@ -2,17 +2,20 @@
 const api = useApi()
 const route = useRoute()
 const router = useRouter()
+const nuxtApp = useNuxtApp()
 
 const page = computed(() => Number(route.query.page) || 1)
 
 const { data: postsData } = await useAsyncData(
   `posts-${page.value}`,
-  () => api.get('/api/v1/posts', { page: page.value, page_size: 10 })
+  () => api.get('/posts', { page: page.value, page_size: 10 }),
+  { getCachedData: () => undefined }
 )
 
 const { data: announcement } = await useAsyncData(
   'announcement',
-  () => api.get('/api/v1/site/announcement')
+  () => api.get('/site/announcement'),
+  { getCachedData: () => undefined }
 )
 
 const totalPages = computed(() =>

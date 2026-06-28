@@ -5,6 +5,7 @@ export interface SiteConfig {
   site_subtitle: string
   logo_url: string
   favicon_url: string
+  about_content: string
   footer_text: string
   social_links: Record<string, string>
   comment_enabled: boolean

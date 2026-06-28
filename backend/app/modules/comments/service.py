@@ -23,6 +23,7 @@ async def create_comment(db: AsyncSession, post_slug: str, nickname: str, conten
     )
     db.add(comment)
     await db.flush()
+    await db.refresh(comment)
     return comment
 
 
@@ -63,6 +64,7 @@ async def update_comment_status(db: AsyncSession, comment_id: int, status: str) 
         return None
     comment.status = status
     await db.flush()
+    await db.refresh(comment)
     return comment
 
 

@@ -12,6 +12,7 @@ DEFAULT_CONFIG = {
     "logo_url": "",
     "favicon_url": "",
     "announcement": "",
+    "about_content": "这是 YeYi 的个人博客，记录生活与代码。\n\n使用 Nuxt 3 + FastAPI 构建，采用洛克魔法书设计风格。",
     "footer_text": "© 2026 YeYi",
     "social_links": "{}",
     "comment_enabled": "true",
@@ -25,8 +26,8 @@ async def get_all_config(db: AsyncSession) -> dict:
     config = {row.config_key: row.config_value for row in rows}
     merged = {**DEFAULT_CONFIG, **config}
 
-    merged["comment_enabled"] = merged["comment_enabled"].lower() == "true"
-    merged["comment_need_review"] = merged["comment_need_review"].lower() == "true"
+    merged["comment_enabled"] = str(merged["comment_enabled"] or "").lower() == "true"
+    merged["comment_need_review"] = str(merged["comment_need_review"] or "").lower() == "true"
     try:
         merged["social_links"] = json.loads(merged["social_links"])
     except (json.JSONDecodeError, TypeError):

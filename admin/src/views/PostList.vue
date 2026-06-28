@@ -10,10 +10,13 @@ const loading = ref(false)
 
 const fetchPosts = async () => {
   loading.value = true
-  const { data } = await postsApi.list({ page: page.value, page_size: 20 })
-  posts.value = data.items
-  total.value = data.total
-  loading.value = false
+  try {
+    const { data } = await postsApi.list({ page: page.value, page_size: 20 })
+    posts.value = data.items
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
 }
 
 const handlePublish = async (post: Post) => {
@@ -48,7 +51,7 @@ onMounted(fetchPosts)
     <el-table :data="posts" v-loading="loading" stripe>
       <el-table-column prop="title" label="标题" min-width="200">
         <template #default="{ row }">
-          <router-link :to="`/posts/${row.id}/edit`" class="text-blue-600 hover:underline">
+          <router-link :to="`/posts/${row.id}/edit`" class="text-rocom-accent-blue hover:text-rocom-primary transition-colors">
             {{ row.title }}
           </router-link>
         </template>

@@ -3,7 +3,8 @@ export function useVisit() {
   const api = useApi()
 
   const recordVisit = () => {
-    api.post('/api/v1/visit', {
+    if (import.meta.server) return
+    api.post('/visit', {
       page_path: route.fullPath,
       page_title: document.title || null,
     }).catch(() => {})

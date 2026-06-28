@@ -2,11 +2,9 @@
 
 @font-face {
   font-family: "Alimama FangYuanTi";
-  src: url("https://cdn.jsdelivr.net/npm/alimama-fangyuan-font@1.0.0/fonts/AlimamaFangYuanTiVF-Thin.woff2") format("woff2"),
-       url("https://cdn.jsdelivr.net/npm/alimama-fangyuan-font@1.0.0/fonts/AlimamaFangYuanTiVF-Thin.woff") format("woff"),
-       url("https://cdn.jsdelivr.net/npm/alimama-fangyuan-font@1.0.0/fonts/AlimamaFangYuanTiVF-Thin.ttf") format("truetype");
+  src: url("/fonts/AlimamaFangYuanTi.otf") format("opentype");
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 400;
   font-display: swap;
 }
 
@@ -93,6 +91,13 @@ body {
   background-color: var(--rocom-bg);
   color: var(--rocom-text);
   transition: background-color 0.3s, color 0.3s;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-bold, .font-semibold, h1, h2, h3, h4 {
+  -webkit-text-stroke: 0.3px;
+  paint-order: stroke fill;
 }
 
 @media (prefers-reduced-motion: reduce) {
