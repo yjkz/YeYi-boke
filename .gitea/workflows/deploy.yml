@@ -38,7 +38,8 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          scp -o StrictHostKeyChecking=no deploy/docker-compose.prod.yml deploy/gateway.conf root@${{ secrets.SERVER_IP }}:/home/Gitea/YeYi-boke/
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.SERVER_IP }} 'mkdir -p /home/YeYi-boke'
+          scp -o StrictHostKeyChecking=no deploy/docker-compose.prod.yml deploy/gateway.conf root@${{ secrets.SERVER_IP }}:/home/YeYi-boke/
           rm -f ~/.ssh/id_ed25519
 
       - name: Deploy to server
@@ -48,7 +49,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh -o StrictHostKeyChecking=no root@${{ secrets.SERVER_IP }} '
             echo "${{ secrets.ACR_PASSWORD }}" | docker login --username=nick8473594517 --password-stdin crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com
-            cd /home/Gitea/YeYi-boke
+            cd /home/YeYi-boke
             echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" > .env
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
             docker compose -f docker-compose.prod.yml pull
