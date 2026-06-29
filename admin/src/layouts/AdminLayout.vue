@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import {
   LayoutDashboard, FileText, MessageSquare, FolderOpen,
-  Tag, Settings, TrendingUp, LogOut, Menu as MenuIcon, X
+  Tag, Settings, TrendingUp, LogOut, Menu as MenuIcon, X, Lock
 } from 'lucide-vue-next'
 
 import { configApi } from '@/api/config'
@@ -44,6 +44,7 @@ const menuItems = [
   { path: '/tags', label: '标签管理', icon: Tag },
   { path: '/settings', label: '站点配置', icon: Settings },
   { path: '/analytics', label: '访问统计', icon: TrendingUp },
+  { path: '/password', label: '修改密码', icon: Lock },
 ]
 </script>
 

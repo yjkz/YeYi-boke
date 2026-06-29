@@ -35,6 +35,7 @@ const router = createRouter({
           component: () => import('@/views/SiteConfig.vue'),
         },
         { path: 'analytics', name: 'Analytics', component: () => import('@/views/Analytics.vue') },
+        { path: 'password', name: 'ChangePassword', component: () => import('@/views/ChangePassword.vue') },
       ],
     },
   ],

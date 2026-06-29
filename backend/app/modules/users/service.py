@@ -74,3 +74,11 @@ async def upload_image(file: UploadFile) -> str:
         f.write(content)
 
     return f"/uploads/{filename}"
+
+
+async def change_password(db: AsyncSession, user: User, current_password: str, new_password: str) -> bool:
+    if not verify_password(current_password, user.password_hash):
+        return False
+    user.password_hash = hash_password(new_password)
+    await db.flush()
+    return True

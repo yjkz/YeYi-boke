@@ -25,4 +25,6 @@ export const authApi = {
   getMe: () => api.get<User>('/api/v1/auth/me'),
   refresh: (token: string) =>
     api.post<TokenResponse>('/api/v1/auth/refresh', { refresh_token: token }),
+  changePassword: (data: { current_password: string; new_password: string }) =>
+    api.put('/api/v1/auth/password', data),
 }

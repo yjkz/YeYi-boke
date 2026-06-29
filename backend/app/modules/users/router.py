@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.dependencies import get_current_user, require_admin
 from app.modules.users.model import User
-from app.modules.users.schema import LoginRequest, RefreshRequest, TokenResponse, UserResponse
-from app.modules.users.service import authenticate_user, create_tokens, invalidate_refresh_token, refresh_access_token, store_refresh_token, upload_image
+from app.modules.users.schema import LoginRequest, PasswordChangeRequest, RefreshRequest, TokenResponse, UserResponse
+from app.modules.users.service import authenticate_user, change_password, create_tokens, invalidate_refresh_token, refresh_access_token, store_refresh_token, upload_image
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -37,6 +37,14 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
 @router.get("/me", response_model=UserResponse)
 async def get_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.put("/password")
+async def update_password(body: PasswordChangeRequest, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    success = await change_password(db, current_user, body.current_password, body.new_password)
+    if not success:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
+    return {"message": "Password updated"}
 
 
 admin_router = APIRouter(prefix="/admin", tags=["admin"])
