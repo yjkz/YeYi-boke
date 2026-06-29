@@ -2,6 +2,8 @@ services:
   admin:
     image: crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-admin:latest
     container_name: yeyi_blog_admin
+    ports:
+      - "3001:80"
 
   backend:
     image: crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-backend:latest
