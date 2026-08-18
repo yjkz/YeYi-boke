@@ -1,0 +1,83 @@
+name: Deploy Blog
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: yeyi-blog-production
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: 腾讯云4h4g
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Alibaba Cloud Container Registry
+        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login --username=nick8473594517 --password-stdin crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com
+
+      - name: Build and push backend
+        run: |
+          docker build \
+            -t crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-backend:${{ github.sha }} \
+            -t crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-backend:latest \
+            ./backend
+          docker push crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-backend:${{ github.sha }}
+          docker push crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-backend:latest
+
+      - name: Build and push frontend
+        run: |
+          docker build \
+            -t crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-frontend:${{ github.sha }} \
+            -t crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-frontend:latest \
+            ./frontend
+          docker push crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-frontend:${{ github.sha }}
+          docker push crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-frontend:latest
+
+      - name: Build and push admin
+        run: |
+          docker build \
+            -t crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-admin:${{ github.sha }} \
+            -t crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-admin:latest \
+            ./admin
+          docker push crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-admin:${{ github.sha }}
+          docker push crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-admin:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment: 腾讯云4h4g
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Upload deployment files
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: deploy
+          key: ${{ secrets.SSH_KEY }}
+          source: deploy/docker-compose.prod.yml,deploy/gateway.conf
+          target: /home/YeYi-boke
+          strip_components: 1
+
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: deploy
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            mkdir -p /home/YeYi-boke
+            cd /home/YeYi-boke
+            echo "${{ secrets.ACR_PASSWORD }}" | docker login --username=nick8473594517 --password-stdin crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com
+            printf 'JWT_SECRET_KEY=%s\nMYSQL_ROOT_PASSWORD=%s\n' "${{ secrets.JWT_SECRET_KEY }}" "${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
