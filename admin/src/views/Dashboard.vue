@@ -12,10 +12,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-8">
-      <div class="bg-rocom-surface-paper rounded-2xl shadow-paper border border-rocom-outline p-6 flex items-start gap-4">
-        <div class="w-10 h-10 rounded-xl bg-rocom-primary-soft flex items-center justify-center shrink-0">
+  <div class="max-w-6xl">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:gap-5">
+      <div class="flex items-start gap-4 rounded-xl border border-rocom-outline bg-rocom-surface-paper p-4 shadow-sm sm:p-5">
+        <div class="w-10 h-10 rounded-lg bg-rocom-primary-soft flex items-center justify-center shrink-0">
           <Eye :size="20" class="text-rocom-primary-outline" />
         </div>
         <div>
@@ -23,8 +23,8 @@ onMounted(async () => {
           <div class="text-2xl font-bold text-rocom-text-strong mt-1">{{ stats?.today_pv ?? '-' }}</div>
         </div>
       </div>
-      <div class="bg-rocom-surface-paper rounded-2xl shadow-paper border border-rocom-outline p-6 flex items-start gap-4">
-        <div class="w-10 h-10 rounded-xl bg-rocom-accent-blue/10 flex items-center justify-center shrink-0">
+      <div class="flex items-start gap-4 rounded-xl border border-rocom-outline bg-rocom-surface-paper p-4 shadow-sm sm:p-5">
+        <div class="w-10 h-10 rounded-lg bg-rocom-accent-blue/10 flex items-center justify-center shrink-0">
           <FileText :size="20" class="text-rocom-accent-blue" />
         </div>
         <div>
@@ -32,8 +32,8 @@ onMounted(async () => {
           <div class="text-2xl font-bold text-rocom-text-strong mt-1">{{ stats?.total_posts ?? '-' }}</div>
         </div>
       </div>
-      <div class="bg-rocom-surface-paper rounded-2xl shadow-paper border border-rocom-outline p-6 flex items-start gap-4">
-        <div class="w-10 h-10 rounded-xl bg-rocom-success/10 flex items-center justify-center shrink-0">
+      <div class="flex items-start gap-4 rounded-xl border border-rocom-outline bg-rocom-surface-paper p-4 shadow-sm sm:p-5">
+        <div class="w-10 h-10 rounded-lg bg-rocom-success/10 flex items-center justify-center shrink-0">
           <MessageSquare :size="20" class="text-rocom-success" />
         </div>
         <div>

@@ -15,10 +15,12 @@ export default defineNuxtConfig({
     apiBase: '',
     public: {
       apiBase: '/api/v1',
+      adminUrl: 'http://localhost:3001',
     },
   },
 
   app: {
+    pageTransition: { name: 'page-fade', mode: 'out-in', appear: true },
     head: {
       title: 'YeYi 的博客',
       htmlAttrs: { lang: 'zh-CN' },
@@ -29,7 +31,7 @@ export default defineNuxtConfig({
         { property: 'og:title', content: 'YeYi 的博客' },
         { property: 'og:description', content: '记录生活与代码' },
         { property: 'og:type', content: 'website' },
-        { name: 'theme-color', content: '#FFF6E0' },
+        { name: 'theme-color', content: '#F8F7F4' },
       ],
       link: [
         {

@@ -5,21 +5,24 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
 from app.database import Base, get_db
 from app.main import app
 from app.modules.users.model import User
 from app.utils.security import hash_password
 
-TEST_DATABASE_URL = "mysql+asyncmy://root:root@localhost:3306/yeyi_blog_test"
+TEST_DATABASE_URL = "mysql+asyncmy://root:root@127.0.0.1:3306/yeyi_blog_test"
 
-engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+engine = create_async_engine(TEST_DATABASE_URL, echo=False, poolclass=NullPool)
 TestSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 @pytest.fixture(autouse=True)
 def mock_redis():
-    with patch("app.modules.users.service.redis_client") as mock:
+    with patch("app.modules.users.service.redis_client") as mock, \
+         patch("app.modules.mcp.service.redis_client", mock), \
+         patch("app.mcp.auth.redis_client", mock):
         mock.set = AsyncMock()
         mock.get = AsyncMock(return_value=None)
         mock.delete = AsyncMock()
@@ -31,7 +34,10 @@ def mock_redis():
 
 
 @pytest_asyncio.fixture(autouse=True)
-async def setup_database():
+async def setup_database(request):
+    if request.node.get_closest_marker("no_db"):
+        yield
+        return
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield

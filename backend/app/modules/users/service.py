@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 
 from fastapi import UploadFile
@@ -61,12 +62,18 @@ async def refresh_access_token(db: AsyncSession, token: str) -> dict:
 
 
 async def upload_image(file: UploadFile) -> str:
-    ext = os.path.splitext(file.filename)[1] if file.filename else ".png"
+    content = await file.read()
+    return await upload_image_bytes(content, file.filename or "upload.png")
+
+
+async def upload_image_bytes(content: bytes, filename: str) -> str:
+    ext = os.path.splitext(filename)[1].lower() or ".png"
+    if not re.fullmatch(r"\.[a-z0-9]{1,10}", ext):
+        ext = ".bin"
     filename = f"{uuid.uuid4().hex}{ext}"
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     filepath = os.path.join(settings.UPLOAD_DIR, filename)
 
-    content = await file.read()
     if len(content) > settings.MAX_UPLOAD_SIZE:
         raise ValueError("File too large")
 

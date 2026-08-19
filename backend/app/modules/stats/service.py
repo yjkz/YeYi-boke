@@ -4,7 +4,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.comments.model import Comment
-from app.modules.posts.model import Post
+from app.modules.posts.model import Category, Post, Tag
 from app.modules.stats.model import VisitLog, VisitStats
 
 
@@ -34,6 +34,28 @@ async def get_stats_overview(db: AsyncSession) -> dict:
     )).scalar() or 0
 
     return {"today_pv": today_pv, "total_posts": total_posts, "total_comments": total_comments}
+
+
+async def get_public_stats_summary(db: AsyncSession) -> dict:
+    today = date.today()
+    today_pv = (await db.execute(
+        select(func.count()).where(func.date(VisitLog.created_at) == today)
+    )).scalar() or 0
+    published_posts = (await db.execute(
+        select(func.count()).where(Post.status == "published")
+    )).scalar() or 0
+    categories = (await db.execute(select(func.count()).select_from(Category))).scalar() or 0
+    tags = (await db.execute(select(func.count()).select_from(Tag))).scalar() or 0
+    approved_comments = (await db.execute(
+        select(func.count()).where(Comment.status == "approved")
+    )).scalar() or 0
+    return {
+        "today_pv": today_pv,
+        "published_posts": published_posts,
+        "categories": categories,
+        "tags": tags,
+        "approved_comments": approved_comments,
+    }
 
 
 async def get_stats_trend(db: AsyncSession, days: int = 7) -> list[dict]:

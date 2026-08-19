@@ -6,7 +6,17 @@ from app.modules.comments.model import Comment
 from app.modules.posts.model import Post
 
 
-async def create_comment(db: AsyncSession, post_slug: str, nickname: str, content: str, email: str | None = None, website: str | None = None, parent_id: int | None = None, visitor_ip: str | None = None) -> Comment | None:
+async def create_comment(
+    db: AsyncSession,
+    post_slug: str,
+    nickname: str,
+    content: str,
+    email: str | None = None,
+    website: str | None = None,
+    parent_id: int | None = None,
+    visitor_ip: str | None = None,
+    status: str = "pending",
+) -> Comment | None:
     result = await db.execute(select(Post.id).where(Post.slug == post_slug))
     post_id = result.scalar_one_or_none()
     if not post_id:
@@ -20,6 +30,7 @@ async def create_comment(db: AsyncSession, post_slug: str, nickname: str, conten
         website=website,
         content=content,
         visitor_ip=visitor_ip,
+        status=status,
     )
     db.add(comment)
     await db.flush()

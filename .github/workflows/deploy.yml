@@ -78,6 +78,17 @@ jobs:
             mkdir -p /home/YeYi-boke
             cd /home/YeYi-boke
             echo "${{ secrets.ACR_PASSWORD }}" | docker login --username=nick8473594517 --password-stdin crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com
-            printf 'JWT_SECRET_KEY=%s\nMYSQL_ROOT_PASSWORD=%s\n' "${{ secrets.JWT_SECRET_KEY }}" "${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
+            test -n "${{ secrets.MCP_API_KEY }}" || { echo 'MCP_API_KEY GitHub Secret is required' >&2; exit 1; }
+            test -n "${{ secrets.MCP_SETTINGS_ENCRYPTION_KEY }}" || { echo 'MCP_SETTINGS_ENCRYPTION_KEY GitHub Secret is required' >&2; exit 1; }
+            printf 'JWT_SECRET_KEY=%s\nMYSQL_ROOT_PASSWORD=%s\nMCP_API_KEY=%s\nMCP_SETTINGS_ENCRYPTION_KEY=%s\nMCP_PUBLIC_URL=%s\nMCP_RATE_LIMIT=%s\nMCP_RATE_WINDOW=%s\nMCP_ALLOWED_HOSTS=%s\nMCP_ALLOWED_ORIGINS=%s\n' \
+              "${{ secrets.JWT_SECRET_KEY }}" \
+              "${{ secrets.MYSQL_ROOT_PASSWORD }}" \
+              "${{ secrets.MCP_API_KEY }}" \
+              "${{ secrets.MCP_SETTINGS_ENCRYPTION_KEY }}" \
+              'https://blogmcp.yeyeyiyi.online/mcp' \
+              '120' \
+              '60' \
+              '["blogmcp.yeyeyiyi.online"]' \
+              '["https://blogmcp.yeyeyiyi.online"]' > .env
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d

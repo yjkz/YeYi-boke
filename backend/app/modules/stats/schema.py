@@ -12,6 +12,14 @@ class StatsOverview(BaseModel):
     total_comments: int
 
 
+class PublicStatsSummary(BaseModel):
+    today_pv: int
+    published_posts: int
+    categories: int
+    tags: int
+    approved_comments: int
+
+
 class TrendPoint(BaseModel):
     date: str
     page_views: int

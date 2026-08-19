@@ -5,7 +5,9 @@ class SiteConfigResponse(BaseModel):
     site_title: str = "YeYi 的博客"
     site_subtitle: str = ""
     logo_url: str = ""
+    avatar_url: str = ""
     favicon_url: str = ""
+    announcement: str = ""
     about_content: str = ""
     footer_text: str = ""
     social_links: dict = {}
@@ -19,7 +21,9 @@ class SiteConfigUpdate(BaseModel):
     site_title: str | None = None
     site_subtitle: str | None = None
     logo_url: str | None = None
+    avatar_url: str | None = None
     favicon_url: str | None = None
+    announcement: str | None = None
     about_content: str | None = None
     footer_text: str | None = None
     social_links: dict | None = None

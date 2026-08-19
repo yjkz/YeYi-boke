@@ -15,6 +15,8 @@ from app.modules.comments.router import router as comments_router
 from app.modules.config.router import router as config_router
 from app.modules.search.router import router as search_router
 from app.modules.stats.router import router as stats_router
+from app.modules.mcp.router import router as mcp_admin_router
+from app.modules.mcp import model as mcp_model  # noqa: F401
 
 
 @asynccontextmanager
@@ -35,6 +37,7 @@ app.include_router(comments_router, prefix="/api/v1")
 app.include_router(config_router, prefix="/api/v1")
 app.include_router(search_router, prefix="/api/v1")
 app.include_router(stats_router, prefix="/api/v1")
+app.include_router(mcp_admin_router, prefix="/api/v1")
 
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")

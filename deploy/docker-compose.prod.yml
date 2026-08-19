@@ -12,6 +12,35 @@ services:
       - DATABASE_URL=mysql+asyncmy://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/yeyi_blog
       - REDIS_URL=redis://redis:6379/0
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - MCP_API_KEY=${MCP_API_KEY:?MCP_API_KEY must be set in production}
+      - MCP_SETTINGS_ENCRYPTION_KEY=${MCP_SETTINGS_ENCRYPTION_KEY:?MCP_SETTINGS_ENCRYPTION_KEY must be set in production}
+      - MCP_PUBLIC_URL=${MCP_PUBLIC_URL:-https://blogmcp.yeyeyiyi.online/mcp}
+      - MCP_RATE_LIMIT=${MCP_RATE_LIMIT:-120}
+      - MCP_RATE_WINDOW=${MCP_RATE_WINDOW:-60}
+      - MCP_ALLOWED_HOSTS=${MCP_ALLOWED_HOSTS:-[]}
+      - MCP_ALLOWED_ORIGINS=${MCP_ALLOWED_ORIGINS:-[]}
+    volumes:
+      - uploads_data:/backend/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  mcp:
+    image: crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-backend:latest
+    container_name: yeyi_blog_mcp
+    command: ["uvicorn", "app.mcp_server:app", "--host", "0.0.0.0", "--port", "8100"]
+    environment:
+      - DATABASE_URL=mysql+asyncmy://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/yeyi_blog
+      - REDIS_URL=redis://redis:6379/0
+      - MCP_API_KEY=${MCP_API_KEY:?MCP_API_KEY must be set in production}
+      - MCP_SETTINGS_ENCRYPTION_KEY=${MCP_SETTINGS_ENCRYPTION_KEY:?MCP_SETTINGS_ENCRYPTION_KEY must be set in production}
+      - MCP_PUBLIC_URL=${MCP_PUBLIC_URL:-https://blogmcp.yeyeyiyi.online/mcp}
+      - MCP_RATE_LIMIT=${MCP_RATE_LIMIT:-120}
+      - MCP_RATE_WINDOW=${MCP_RATE_WINDOW:-60}
+      - MCP_ALLOWED_HOSTS=${MCP_ALLOWED_HOSTS:-[]}
+      - MCP_ALLOWED_ORIGINS=${MCP_ALLOWED_ORIGINS:-[]}
     volumes:
       - uploads_data:/backend/uploads
     depends_on:
@@ -25,6 +54,7 @@ services:
     container_name: yeyi_blog_frontend
     environment:
       - NUXT_API_BASE=http://backend:8000/api/v1
+      - NUXT_PUBLIC_ADMIN_URL=https://admin.yeyeyiyi.online
 
   gateway:
     image: nginx:alpine
@@ -37,9 +67,11 @@ services:
       - /etc/letsencrypt/live/obsidian.yeyeyiyi.online/fullchain.pem:/cert.pem:ro
       - /etc/letsencrypt/live/obsidian.yeyeyiyi.online/privkey.pem:/privkey.pem:ro
       - /etc/liteSSL/tavily-mcp:/tavily-ssl
+      - /etc/liteSSL/YeYi-blog:/YeYi-blog
     depends_on:
       - admin
       - backend
+      - mcp
       - frontend
 
   mysql:

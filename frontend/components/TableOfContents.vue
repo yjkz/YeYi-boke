@@ -4,13 +4,12 @@ defineProps<{ items: TocItem[] }>()
 </script>
 
 <template>
-  <nav v-if="items.length" class="hidden lg:block sticky top-24 w-56 shrink-0">
-    <h4 class="text-xs font-bold text-rocom-text-caption uppercase tracking-widest mb-3">目录</h4>
+  <nav v-if="items.length" aria-label="文章目录">
     <ul class="space-y-1.5 text-sm">
       <li v-for="item in items" :key="item.id">
         <a
           :href="`#${item.id}`"
-          class="block text-rocom-text-muted hover:text-rocom-primary transition-colors"
+          class="block rounded-md py-1 text-rocom-text-secondary transition-colors hover:bg-rocom-control hover:text-rocom-primary-outline"
           :style="{ paddingLeft: `${(item.level - 2) * 0.75}rem` }"
         >
           {{ item.text }}

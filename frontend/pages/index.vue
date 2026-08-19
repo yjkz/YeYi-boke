@@ -31,7 +31,7 @@ const goToPage = (p: number) => {
   <div>
     <AnnouncementBar v-if="announcement?.content" :content="announcement.content" />
 
-    <div class="grid gap-6 sm:grid-cols-2">
+    <div class="post-grid">
       <PostCard v-for="post in postsData?.items" :key="post.id" :post="post" />
     </div>
 

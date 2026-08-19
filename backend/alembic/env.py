@@ -13,6 +13,7 @@ from app.modules.posts import model  # noqa: F401
 from app.modules.comments import model  # noqa: F401
 from app.modules.config import model  # noqa: F401
 from app.modules.stats import model  # noqa: F401
+from app.modules.mcp import model as mcp_model  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:
