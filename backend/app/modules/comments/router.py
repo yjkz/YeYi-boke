@@ -16,10 +16,12 @@ async def create_comment(body: CommentCreate, request: Request, db: AsyncSession
     config = await get_all_config(db)
     if not config.get("comment_enabled", True):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Comments are disabled")
+    comment_status = "pending" if config.get("comment_need_review", True) else "approved"
     comment = await comment_service.create_comment(
         db, post_slug=body.post_slug, nickname=body.nickname, content=body.content,
         email=body.email, website=body.website, parent_id=body.parent_id,
         visitor_ip=request.client.host if request.client else None,
+        status=comment_status,
     )
     if not comment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")

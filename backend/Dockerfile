@@ -6,4 +6,5 @@ RUN pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ -
 COPY . .
 RUN chmod +x entrypoint.sh
 EXPOSE 8000
+EXPOSE 8100
 CMD ["./entrypoint.sh"]

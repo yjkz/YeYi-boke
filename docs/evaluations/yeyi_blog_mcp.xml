@@ -1,0 +1,42 @@
+<evaluation>
+  <qa_pair>
+    <question>Inspect the post list response contract and report the field that gives the total number of matching posts across all pages. Answer with the field name only.</question>
+    <answer>total</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Read the site configuration and determine whether comments require moderation by default. Answer true or false.</question>
+    <answer>true</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Read the site configuration and report the default site title exactly as configured. Answer with the title only.</question>
+    <answer>YeYi 的博客</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Inspect the statistics overview and report the field that counts published posts. Answer with the field name only.</question>
+    <answer>total_posts</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Inspect the statistics trend for seven days and report the exact name of the field representing distinct visitors. Answer with the field name only.</question>
+    <answer>unique_visitors</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>List categories and tags using pagination, then identify the pagination field that tells a client whether another request is needed. Answer with the field name only.</question>
+    <answer>has_more</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>List comments in each moderation state and identify the state used for comments awaiting review. Answer with the state name only.</question>
+    <answer>pending</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Inspect a post detail and its list representation, then report the relationship field that contains taxonomy labels. Answer with the field name only.</question>
+    <answer>tags</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Inspect the read-only tool metadata and report the annotation property that identifies a tool as safe to call without changing data. Answer with the property name only.</question>
+    <answer>readOnlyHint</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Inspect the read-only tool metadata and report the annotation property that indicates a destructive operation. Answer with the property name only.</question>
+    <answer>destructiveHint</answer>
+  </qa_pair>
+</evaluation>

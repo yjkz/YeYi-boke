@@ -1,4 +1,5 @@
 from feedgen.feed import FeedGenerator
+from datetime import timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -31,6 +32,9 @@ async def generate_rss(db: AsyncSession) -> str:
         fe.link(href=f"{site_url}/posts/{post.slug}")
         fe.description(post.excerpt or "")
         if post.published_at:
-            fe.pubDate(post.published_at.replace(tzinfo=None))
+            published_at = post.published_at
+            if published_at.tzinfo is None:
+                published_at = published_at.replace(tzinfo=timezone.utc)
+            fe.pubDate(published_at.astimezone(timezone.utc))
 
     return fg.rss_str(pretty=True).decode("utf-8")

@@ -17,6 +17,11 @@
 
 .prose p { margin-bottom: 1em; }
 
+.prose ul, .prose ol, .prose li,
+.prose td, .prose th {
+  color: var(--rocom-text);
+}
+
 .prose a {
   color: var(--rocom-accent-blue);
   text-decoration: underline;

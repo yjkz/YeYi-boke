@@ -13,7 +13,7 @@ async def test_login_success(client: AsyncClient, admin_user):
 
 @pytest.mark.asyncio
 async def test_login_wrong_password(client: AsyncClient, admin_user):
-    resp = await client.post("/api/v1/auth/login", json={"username": "admin", "password": "wrong"})
+    resp = await client.post("/api/v1/auth/login", json={"username": "admin", "password": "wrong1"})
     assert resp.status_code == 401
 
 

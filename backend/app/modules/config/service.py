@@ -10,6 +10,7 @@ DEFAULT_CONFIG = {
     "site_title": "YeYi 的博客",
     "site_subtitle": "记录生活与代码",
     "logo_url": "",
+    "avatar_url": "",
     "favicon_url": "",
     "announcement": "",
     "about_content": "这是 YeYi 的个人博客，记录生活与代码。\n\n使用 Nuxt 3 + FastAPI 构建，采用洛克魔法书设计风格。",

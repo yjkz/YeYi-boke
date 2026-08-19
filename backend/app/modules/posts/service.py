@@ -157,6 +157,13 @@ async def get_categories(db: AsyncSession) -> list[Category]:
     return list(result.scalars().all())
 
 
+async def get_categories_page(db: AsyncSession, offset: int = 0, limit: int = 50):
+    base = select(Category)
+    total = (await db.execute(select(func.count()).select_from(base.subquery()))).scalar() or 0
+    result = await db.execute(base.order_by(Category.sort_order, Category.id).offset(offset).limit(limit))
+    return list(result.scalars().all()), total
+
+
 async def create_category(db: AsyncSession, name: str, slug: str, description: str | None = None, sort_order: int = 0) -> Category:
     category = Category(name=name, slug=slug, description=description, sort_order=sort_order)
     db.add(category)
@@ -192,6 +199,13 @@ async def delete_category(db: AsyncSession, category_id: int) -> bool:
 async def get_tags(db: AsyncSession) -> list[Tag]:
     result = await db.execute(select(Tag).order_by(Tag.id))
     return list(result.scalars().all())
+
+
+async def get_tags_page(db: AsyncSession, offset: int = 0, limit: int = 50):
+    base = select(Tag)
+    total = (await db.execute(select(func.count()).select_from(base.subquery()))).scalar() or 0
+    result = await db.execute(base.order_by(Tag.id).offset(offset).limit(limit))
+    return list(result.scalars().all()), total
 
 
 async def create_tag(db: AsyncSession, name: str, slug: str) -> Tag:

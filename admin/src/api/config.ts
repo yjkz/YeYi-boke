@@ -4,6 +4,7 @@ export interface SiteConfig {
   site_title: string
   site_subtitle: string
   logo_url: string
+  avatar_url: string
   favicon_url: string
   about_content: string
   footer_text: string

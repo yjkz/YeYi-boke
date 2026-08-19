@@ -8,6 +8,7 @@ const form = ref<SiteConfig>({
   site_title: '',
   site_subtitle: '',
   logo_url: '',
+  avatar_url: '',
   favicon_url: '',
   about_content: '',
   footer_text: '',
@@ -47,6 +48,14 @@ const handleFaviconUpload = async (options: any) => {
   form.value.favicon_url = data.url
   ElMessage.success('Favicon 已上传')
 }
+
+const handleAvatarUpload = async (options: any) => {
+  const formData = new FormData()
+  formData.append('file', options.file)
+  const { data } = await api.post('/api/v1/admin/upload', formData)
+  form.value.avatar_url = data.url
+  ElMessage.success('头像已上传')
+}
 </script>
 
 <template>
@@ -54,6 +63,16 @@ const handleFaviconUpload = async (options: any) => {
     <el-form label-position="top">
       <el-form-item label="站点标题"><el-input v-model="form.site_title" /></el-form-item>
       <el-form-item label="副标题"><el-input v-model="form.site_subtitle" /></el-form-item>
+
+      <el-form-item label="侧栏头像">
+        <div class="flex items-center gap-3 w-full">
+          <el-upload :http-request="handleAvatarUpload" :show-file-list="false" accept="image/*">
+            <el-button size="small">上传头像</el-button>
+          </el-upload>
+          <el-input v-model="form.avatar_url" placeholder="或输入图片 URL" class="flex-1" />
+        </div>
+        <img v-if="form.avatar_url" :src="form.avatar_url" class="mt-2 h-16 w-16 rounded-full object-cover" />
+      </el-form-item>
 
       <el-form-item label="Logo">
         <div class="flex items-center gap-3 w-full">

@@ -28,7 +28,7 @@ const goToPage = (p: number) => {
       搜索: <span class="text-rocom-primary">{{ query }}</span>
     </h1>
 
-    <div v-if="results?.items?.length" class="grid gap-6 sm:grid-cols-2">
+    <div v-if="results?.items?.length" class="post-grid">
       <PostCard v-for="post in results.items" :key="post.id" :post="post" />
     </div>
     <p v-else-if="query" class="text-rocom-text-muted py-8 text-center">未找到相关文章</p>

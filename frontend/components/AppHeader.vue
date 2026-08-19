@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Menu, X, Rss } from 'lucide-vue-next'
+import { Menu, X } from 'lucide-vue-next'
 
 const { siteConfig } = useSiteConfig()
 const route = useRoute()
@@ -20,30 +20,22 @@ const navLinks = [
       跳到主要内容
     </a>
 
-    <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-      <NuxtLink to="/" class="text-xl font-bold text-rocom-text-strong tracking-wider">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <NuxtLink to="/" class="min-w-0 truncate text-xl font-bold text-rocom-text-strong tracking-wider">
         {{ siteConfig?.site_title || 'YeYi 的博客' }}
       </NuxtLink>
 
-      <nav class="hidden md:flex items-center gap-1" aria-label="主导航">
+      <nav class="hidden md:flex shrink-0 items-center gap-0.5" aria-label="主导航">
         <NuxtLink
           v-for="link in navLinks"
           :key="link.path"
           :to="link.path"
-          class="px-3 py-2 text-sm font-medium text-rocom-text-secondary hover:text-rocom-primary transition-colors rounded-lg hover:bg-rocom-control"
+          class="px-2.5 py-2 text-sm font-medium text-rocom-text-secondary hover:text-rocom-primary transition-colors rounded-lg hover:bg-rocom-control"
           :class="{ 'text-rocom-primary bg-rocom-primary-soft': route.path === link.path }"
         >
           {{ link.label }}
         </NuxtLink>
         <SearchBox />
-        <a
-          href="/api/v1/rss.xml"
-          target="_blank"
-          class="w-11 h-11 flex items-center justify-center text-rocom-text-secondary hover:text-rocom-primary transition-colors rounded-lg hover:bg-rocom-control"
-          aria-label="RSS 订阅"
-        >
-          <Rss :size="18" />
-        </a>
         <DarkToggle />
       </nav>
 
@@ -60,7 +52,7 @@ const navLinks = [
 
     <Transition name="slide-down">
       <div v-if="mobileMenuOpen" class="md:hidden border-t border-rocom-outline bg-rocom-surface-paper">
-        <nav class="flex flex-col p-4 gap-1" aria-label="移动端导航">
+        <nav class="mx-auto flex max-w-[1440px] flex-col gap-1 px-4 py-3 sm:px-6" aria-label="移动端导航">
           <NuxtLink
             v-for="link in navLinks"
             :key="link.path"
@@ -73,14 +65,6 @@ const navLinks = [
           </NuxtLink>
           <div class="flex items-center gap-2 pt-2 mt-2 border-t border-rocom-outline">
             <SearchBox />
-            <a
-              href="/api/v1/rss.xml"
-              target="_blank"
-              class="w-11 h-11 flex items-center justify-center text-rocom-text-secondary hover:text-rocom-primary transition-colors rounded-lg"
-              aria-label="RSS 订阅"
-            >
-              <Rss :size="18" />
-            </a>
             <DarkToggle />
           </div>
         </nav>

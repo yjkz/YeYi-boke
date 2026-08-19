@@ -41,3 +41,23 @@ async def test_publish_post(client: AsyncClient, auth_headers):
 
     list_resp = await client.get("/api/v1/posts")
     assert list_resp.json()["total"] == 1
+
+
+@pytest.mark.asyncio
+async def test_rss_returns_published_posts(client: AsyncClient, auth_headers):
+    create_resp = await client.post(
+        "/api/v1/admin/posts",
+        json={"title": "RSS Post", "slug": "rss-post", "content_md": "RSS content"},
+        headers=auth_headers,
+    )
+    await client.post(
+        f"/api/v1/admin/posts/{create_resp.json()['id']}/publish",
+        headers=auth_headers,
+    )
+
+    response = await client.get("/api/v1/rss.xml")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("application/rss+xml")
+    assert "RSS Post" in response.text
+    assert "http://localhost:3000/posts/rss-post" in response.text
