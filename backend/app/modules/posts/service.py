@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload
 
 from app.modules.posts.model import Category, Post, Tag, post_tags
 from app.modules.posts.schema import PostCreate, PostUpdate
-from app.utils.markdown import render_markdown
+from app.utils.markdown import excerpt_from_markdown, render_markdown
 from app.utils.slug import generate_slug
 
 
@@ -37,6 +37,10 @@ async def get_posts(
 
     result = await db.execute(query.offset(offset).limit(limit))
     posts = result.scalars().unique().all()
+    for post in posts:
+        if post.excerpt:
+            source = post.content_md if post.content_md and post.excerpt == post.content_md[:200] else post.excerpt
+            post.excerpt = excerpt_from_markdown(source)
     return posts, total
 
 
@@ -67,7 +71,7 @@ async def increment_view_count(db: AsyncSession, post: Post) -> None:
 async def create_post(db: AsyncSession, data: PostCreate) -> Post:
     slug = data.slug or generate_slug(data.title)
     content_html = render_markdown(data.content_md) if data.content_md else ""
-    excerpt = data.excerpt or (data.content_md[:200] if data.content_md else "")
+    excerpt = excerpt_from_markdown(data.excerpt) if data.excerpt else excerpt_from_markdown(data.content_md)
 
     post = Post(
         title=data.title,
@@ -106,7 +110,9 @@ async def update_post(db: AsyncSession, post_id: int, data: PostUpdate) -> Post 
     if "content_md" in update_data:
         update_data["content_html"] = render_markdown(update_data["content_md"])
         if "excerpt" not in update_data:
-            update_data["excerpt"] = update_data["content_md"][:200]
+            update_data["excerpt"] = excerpt_from_markdown(update_data["content_md"])
+    elif "excerpt" in update_data and update_data["excerpt"]:
+        update_data["excerpt"] = excerpt_from_markdown(update_data["excerpt"])
 
     for key, value in update_data.items():
         setattr(post, key, value)

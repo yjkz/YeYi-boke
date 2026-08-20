@@ -44,6 +44,29 @@ async def test_publish_post(client: AsyncClient, auth_headers):
 
 
 @pytest.mark.asyncio
+async def test_public_post_list_excerpt_is_plain_text(client: AsyncClient, auth_headers):
+    create_resp = await client.post(
+        "/api/v1/admin/posts",
+        json={
+            "title": "Markdown excerpt",
+            "slug": "markdown-excerpt",
+            "content_md": "> **项目地址**：[GitHub](https://github.com/example)\n\n正文内容",
+        },
+        headers=auth_headers,
+    )
+    await client.post(
+        f"/api/v1/admin/posts/{create_resp.json()['id']}/publish",
+        headers=auth_headers,
+    )
+
+    excerpt = (await client.get("/api/v1/posts")).json()["items"][0]["excerpt"]
+
+    assert excerpt == "项目地址：GitHub 正文内容"
+    assert "**" not in excerpt
+    assert "[GitHub]" not in excerpt
+
+
+@pytest.mark.asyncio
 async def test_public_posts_filter_by_category_and_tag(client: AsyncClient, auth_headers):
     category = await client.post(
         "/api/v1/admin/categories",

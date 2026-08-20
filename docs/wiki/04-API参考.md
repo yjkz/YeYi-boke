@@ -27,7 +27,7 @@ token 机制：access 120 分钟；refresh 7 天且存于 Redis（`refresh_token
 | GET | `/tags` | — | 全部标签，按 id |
 | GET | `/rss.xml` | — | `application/rss+xml`，最近 20 篇已发布；接口保留，前台导航暂不显示入口 |
 
-**PostResponse 字段**：`id, title, slug, content_md, content_html, excerpt, cover_image, status, category{id,name,slug,description,sort_order}|null, tags[{id,name,slug}], view_count, is_top, created_at, updated_at, published_at`。列表项 `PostListItem` 同上但**不含** content_md/content_html。
+**PostResponse 字段**：`id, title, slug, content_md, content_html, excerpt, cover_image, status, category{id,name,slug,description,sort_order}|null, tags[{id,name,slug}], view_count, is_top, created_at, updated_at, published_at`。`excerpt` 为不含 Markdown 源标记的纯文本摘要，列表项 `PostListItem` 同上但**不含** content_md/content_html。
 
 ## 3. 文章管理（`/admin/*`，需 admin）
 
@@ -42,7 +42,7 @@ token 机制：access 120 分钟；refresh 7 天且存于 Redis（`refresh_token
 | POST | `/admin/posts/{id}/draft` | — | 下架为 draft |
 
 **PostCreate**：`{title(必填1-200), slug?(缺省拼音生成), content_md?, excerpt?, cover_image?, category_id?, tag_ids?:[], is_top?:false}`。
-**PostUpdate**：全部字段 Optional；`content_md` 变更时服务端重渲染 `content_html` 并在未显式传 excerpt 时重新截取。
+**PostUpdate**：全部字段 Optional；`content_md` 变更时服务端重渲染 `content_html` 并在未显式传 excerpt 时重新提取纯文本摘要；显式 excerpt 也会清理 Markdown 标记。
 
 Admin 编辑器自动保存复用上述 POST/PUT：新建页标题非空后创建 draft，已有 draft 按 2 秒防抖更新；已发布文章不会自动保存，需显式点击保存。自动保存不新增接口、请求字段或数据库表。`content_html` 已统一清洗，代码块保留语言 class，公式保留 `$ / $$` 语义标记。
 

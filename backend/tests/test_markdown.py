@@ -1,6 +1,6 @@
 import pytest
 
-from app.utils.markdown import render_markdown
+from app.utils.markdown import excerpt_from_markdown, render_markdown
 
 
 @pytest.mark.no_db
@@ -27,3 +27,12 @@ def test_render_markdown_sanitizes_html_and_dangerous_urls():
     assert '<script' not in rendered.lower()
     assert 'onerror' not in rendered.lower()
     assert 'href="javascript:' not in rendered.lower()
+
+
+@pytest.mark.no_db
+def test_excerpt_from_markdown_returns_plain_text():
+    excerpt = excerpt_from_markdown(
+        "> **项目地址**：[GitHub](https://github.com/example)\n\n正文内容"
+    )
+
+    assert excerpt == "项目地址：GitHub 正文内容"

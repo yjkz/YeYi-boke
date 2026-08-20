@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.modules.posts.model import Post
+from app.utils.markdown import excerpt_from_markdown
 
 
 async def search_posts(db: AsyncSession, query: str, offset: int = 0, limit: int = 10) -> tuple[list[Post], int]:
@@ -23,4 +24,9 @@ async def search_posts(db: AsyncSession, query: str, offset: int = 0, limit: int
     total = (await db.execute(count_query)).scalar()
 
     result = await db.execute(base.offset(offset).limit(limit))
-    return list(result.scalars().unique().all()), total
+    posts = list(result.scalars().unique().all())
+    for post in posts:
+        if post.excerpt:
+            source = post.content_md if post.content_md and post.excerpt == post.content_md[:200] else post.excerpt
+            post.excerpt = excerpt_from_markdown(source)
+    return posts, total

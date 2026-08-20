@@ -1,4 +1,6 @@
 from html import escape
+from html.parser import HTMLParser
+import re
 
 import bleach
 from markdown_it import MarkdownIt
@@ -52,3 +54,41 @@ def render_markdown(text: str) -> str:
         protocols=ALLOWED_PROTOCOLS,
         strip=True,
     )
+
+
+class _PlainTextParser(HTMLParser):
+    """Extract readable text from the already-sanitized Markdown HTML."""
+
+    _ignored_tags = {"script", "style"}
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+        self._ignored_depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in self._ignored_tags:
+            self._ignored_depth += 1
+            return
+        if tag == "img":
+            alt = dict(attrs).get("alt")
+            if alt:
+                self.parts.append(alt)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in self._ignored_tags and self._ignored_depth:
+            self._ignored_depth -= 1
+
+    def handle_data(self, data: str) -> None:
+        if not self._ignored_depth:
+            self.parts.append(data)
+
+
+def excerpt_from_markdown(text: str, limit: int = 200) -> str:
+    """Return a compact plain-text excerpt without Markdown syntax."""
+    if not text:
+        return ""
+    parser = _PlainTextParser()
+    parser.feed(render_markdown(text))
+    plain_text = re.sub(r"\s+", " ", "".join(parser.parts)).strip()
+    return plain_text[:limit]
