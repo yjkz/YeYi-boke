@@ -32,6 +32,7 @@ watch(() => route.fullPath, () => {
       </div>
     </main>
     <AnnouncementModal />
+    <RecentPostsModal />
     <AppFooter />
   </div>
 </template>

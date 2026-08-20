@@ -11,8 +11,10 @@ const activeToc = useState<TocItem[]>('active-post-toc', () => [])
 const isPostPage = computed(() => typeof route.params.slug === 'string' && route.path.startsWith('/posts/'))
 const tocItems = computed(() => activeToc.value.filter((item) => item.level === 2 || item.level === 3))
 
+const { openRecentPosts } = useRecentPostsModal()
+
 const { data: recentPosts } = await useAsyncData<PostItem[]>('sidebar-recent-posts', async () => {
-  const result = await api.get<{ items: PostItem[] }>('/posts', { page: 1, page_size: 5 })
+  const result = await api.get<{ items: PostItem[] }>('/posts', { page: 1, page_size: 5, sort: 'latest' })
   return result.items
 })
 const { data: stats } = await useAsyncData<PublicStats>('sidebar-public-stats', () => api.get('/stats/summary'))
@@ -29,7 +31,16 @@ const formatDate = (value?: string | null) => value ? new Date(value).toLocaleDa
 
     <template v-else>
       <section v-if="recentPosts?.length" class="sidebar-widget">
-        <div class="sidebar-widget-title"><FileText :size="15" />最新文章</div>
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <div class="sidebar-widget-title mb-0"><FileText :size="15" />最新文章</div>
+          <button
+            type="button"
+            class="shrink-0 text-xs text-rocom-primary-outline transition-colors hover:text-rocom-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rocom-primary"
+            @click="openRecentPosts($event.currentTarget)"
+          >
+            查看全部
+          </button>
+        </div>
         <nav class="space-y-1" aria-label="最新文章">
           <NuxtLink v-for="post in recentPosts" :key="post.id" :to="`/posts/${post.slug}`" class="group block rounded-md px-2 py-1.5 transition-colors hover:bg-rocom-control">
             <span class="block line-clamp-2 text-sm leading-5 text-rocom-text-secondary group-hover:text-rocom-primary-outline">{{ post.title }}</span>

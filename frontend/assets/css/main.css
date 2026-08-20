@@ -165,6 +165,12 @@ body {
   gap: 1.5rem;
 }
 
+.post-grid--single > * {
+  width: 100%;
+  max-width: 48rem;
+  justify-self: start;
+}
+
 .page-fade-enter-active,
 .page-fade-leave-active {
   transition: opacity 220ms ease-out, transform 220ms ease-out;

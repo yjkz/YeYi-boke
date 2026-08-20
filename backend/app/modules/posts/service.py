@@ -17,11 +17,15 @@ async def get_posts(
     category_slug: str | None = None,
     tag_slug: str | None = None,
     status: str | None = None,
+    latest_first: bool = False,
 ):
     query = select(Post).options(selectinload(Post.category), selectinload(Post.tags))
     if status:
         query = query.where(Post.status == status)
-    query = query.order_by(Post.is_top.desc(), Post.published_at.desc())
+    if latest_first:
+        query = query.order_by(Post.published_at.desc(), Post.id.desc())
+    else:
+        query = query.order_by(Post.is_top.desc(), Post.published_at.desc(), Post.id.desc())
 
     if category_slug:
         query = query.join(Category).where(Category.slug == category_slug)

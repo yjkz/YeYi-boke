@@ -76,6 +76,28 @@ async def test_public_posts_filter_by_category_and_tag(client: AsyncClient, auth
 
 
 @pytest.mark.asyncio
+async def test_public_posts_latest_sort_ignores_pin_priority(client: AsyncClient, auth_headers):
+    older = await client.post(
+        "/api/v1/admin/posts",
+        json={"title": "Older", "slug": "older", "content_md": "content", "is_top": True},
+        headers=auth_headers,
+    )
+    await client.post(f"/api/v1/admin/posts/{older.json()['id']}/publish", headers=auth_headers)
+
+    newer = await client.post(
+        "/api/v1/admin/posts",
+        json={"title": "Newer", "slug": "newer", "content_md": "content"},
+        headers=auth_headers,
+    )
+    await client.post(f"/api/v1/admin/posts/{newer.json()['id']}/publish", headers=auth_headers)
+
+    result = await client.get("/api/v1/posts", params={"sort": "latest"})
+
+    assert result.status_code == 200
+    assert result.json()["items"][0]["slug"] == "newer"
+
+
+@pytest.mark.asyncio
 async def test_admin_posts_can_filter_by_status(client: AsyncClient, auth_headers):
     response = await client.post(
         "/api/v1/admin/posts",

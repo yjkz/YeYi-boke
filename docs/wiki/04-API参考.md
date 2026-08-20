@@ -21,7 +21,7 @@ token 机制：access 120 分钟；refresh 7 天且存于 Redis（`refresh_token
 
 | 方法 | 路径 | 参数 | 说明 |
 |------|------|------|------|
-| GET | `/posts` | `page, page_size, category=<slug>, tag=<slug>` | 仅 published；排序：置顶优先、发布时间倒序 |
+| GET | `/posts` | `page, page_size, category=<slug>, tag=<slug>, sort=default|latest` | 仅 published；默认排序为置顶优先、发布时间倒序；`sort=latest` 忽略置顶权重，严格按发布时间倒序（同时间按 id 倒序） |
 | GET | `/posts/{slug}` | — | 详情（含 content_html、category、tags）；非 published 404；同 IP 1 小时内浏览量只计一次 |
 | GET | `/categories` | — | 全部分类，按 `sort_order, id` |
 | GET | `/tags` | — | 全部标签，按 id |

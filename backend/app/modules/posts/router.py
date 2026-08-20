@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import Response
 from sqlalchemy.exc import IntegrityError
@@ -24,9 +26,18 @@ async def list_posts(
     pagination: Pagination = Depends(),
     category: str | None = None,
     tag: str | None = None,
+    sort: Literal["default", "latest"] = Query("default"),
     db: AsyncSession = Depends(get_db),
 ):
-    posts, total = await post_service.get_posts(db, offset=pagination.offset, limit=pagination.page_size, category_slug=category, tag_slug=tag, status="published")
+    posts, total = await post_service.get_posts(
+        db,
+        offset=pagination.offset,
+        limit=pagination.page_size,
+        category_slug=category,
+        tag_slug=tag,
+        status="published",
+        latest_first=sort == "latest",
+    )
     return {"items": posts, "total": total, "page": pagination.page, "page_size": pagination.page_size}
 
 

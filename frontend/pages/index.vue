@@ -45,7 +45,7 @@ const clearFilter = () => router.push({ path: '/', query: {} })
 
     <p v-if="status === 'pending'" class="py-16 text-center text-rocom-text-muted">加载中...</p>
     <p v-else-if="error" class="py-16 text-center text-rocom-danger">文章加载失败，请稍后重试。</p>
-    <div v-else class="post-grid">
+    <div v-else class="post-grid" :class="{ 'post-grid--single': postsData?.items?.length === 1 }">
       <PostCard v-for="post in postsData?.items" :key="post.id" :post="post" />
     </div>
 
