@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import {
   LayoutDashboard, FileText, MessageSquare, FolderOpen,
-  Tag, Settings, TrendingUp, LogOut, Menu as MenuIcon, X, Lock, Server
+  Tag, Settings, TrendingUp, LogOut, Menu as MenuIcon, X, Lock, Server, Globe2
 } from 'lucide-vue-next'
 
 import { configApi } from '@/api/config'
@@ -12,6 +12,7 @@ import { configApi } from '@/api/config'
 const auth = useAuthStore()
 const router = useRouter()
 const sidebarOpen = ref(false)
+const blogUrl = String(import.meta.env.VITE_BLOG_URL || 'http://localhost:3000').replace(/\/$/, '')
 
 onMounted(async () => {
   try {
@@ -102,6 +103,17 @@ const menuItems = [
         </div>
         <div class="shrink-0 flex items-center gap-2 sm:gap-4">
           <span class="text-sm text-rocom-text-secondary hidden sm:inline">{{ auth.user?.username }}</span>
+          <a
+            :href="blogUrl"
+            target="_blank"
+            rel="noreferrer"
+            class="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-sm text-rocom-text-secondary transition-colors hover:bg-rocom-control-hover hover:text-rocom-primary-outline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rocom-primary-outline"
+            aria-label="前往博客前台"
+            title="前往博客前台"
+          >
+            <Globe2 :size="16" />
+            <span class="hidden sm:inline">前往 Blog</span>
+          </a>
           <el-button size="small" @click="logout" aria-label="退出登录">
             <LogOut :size="14" class="mr-1" />
             退出

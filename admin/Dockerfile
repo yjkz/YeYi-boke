@@ -3,6 +3,8 @@ WORKDIR /admin
 COPY ./package*.json ./
 RUN npm ci
 COPY . .
+ARG VITE_BLOG_URL=http://localhost:3000
+ENV VITE_BLOG_URL=$VITE_BLOG_URL
 RUN npm run build
 
 FROM nginx:alpine AS runner
