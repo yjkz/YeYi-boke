@@ -7,6 +7,7 @@ const comments = ref<Comment[]>([])
 const total = ref(0)
 const page = ref(1)
 const statusFilter = ref('')
+const postTitleFilter = ref('')
 const loading = ref(false)
 
 const statusMap: Record<string, string> = { pending: 'warning', approved: 'success', rejected: 'danger' }
@@ -16,6 +17,7 @@ const fetchComments = async () => {
   try {
     const params: any = { page: page.value, page_size: 20 }
     if (statusFilter.value) params.status = statusFilter.value
+    if (postTitleFilter.value.trim()) params.post_title = postTitleFilter.value.trim()
     const { data } = await commentsApi.list(params)
     comments.value = data.items
     total.value = data.total
@@ -50,16 +52,20 @@ onMounted(fetchComments)
 
 <template>
   <div>
-    <div class="mb-4 flex items-center gap-4">
+    <div class="mb-4 flex flex-wrap items-center gap-3">
       <el-select v-model="statusFilter" placeholder="筛选状态" clearable @change="fetchComments">
         <el-option label="待审核" value="pending" />
         <el-option label="已通过" value="approved" />
         <el-option label="已拒绝" value="rejected" />
       </el-select>
+      <el-input v-model="postTitleFilter" clearable placeholder="文章标题" class="w-52" @keyup.enter="page = 1; fetchComments" @clear="page = 1; fetchComments" />
+      <el-button @click="page = 1; fetchComments">筛选</el-button>
+      <el-button @click="statusFilter = ''; postTitleFilter = ''; page = 1; fetchComments">重置</el-button>
     </div>
 
     <el-table :data="comments" v-loading="loading" stripe>
       <el-table-column prop="nickname" label="昵称" width="120" />
+      <el-table-column label="文章" min-width="180"><template #default="{ row }"><a :href="`/posts/${row.post_slug}`" target="_blank" class="text-rocom-accent-blue hover:underline">{{ row.post_title }}</a></template></el-table-column>
       <el-table-column prop="content" label="内容" min-width="200" show-overflow-tooltip />
       <el-table-column prop="status" label="状态" width="100">
         <template #default="{ row }">
@@ -79,6 +85,7 @@ onMounted(fetchComments)
         </template>
       </el-table-column>
     </el-table>
+    <p v-if="!loading && !comments.length" class="py-8 text-center text-rocom-text-muted">暂无评论</p>
 
     <el-pagination
       v-model:current-page="page"

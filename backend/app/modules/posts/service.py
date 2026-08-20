@@ -80,11 +80,12 @@ async def create_post(db: AsyncSession, data: PostCreate) -> Post:
     await db.refresh(post)
 
     if data.tag_ids:
-        tags = (await db.execute(select(Tag).where(Tag.id.in_(data.tag_ids)))).scalars().all()
-        post.tags = tags
+        await db.execute(
+            post_tags.insert(),
+            [{"post_id": post.id, "tag_id": tag_id} for tag_id in data.tag_ids],
+        )
 
-    await db.refresh(post, ["category", "tags"])
-    return post
+    return await get_post_by_id(db, post.id)
 
 
 async def update_post(db: AsyncSession, post_id: int, data: PostUpdate) -> Post | None:

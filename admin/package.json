@@ -11,15 +11,23 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
     "axios": "^1.18.1",
+    "dompurify": "^3.4.14",
     "element-plus": "^2.14.2",
+    "katex": "^0.16.22",
     "lucide-vue-next": "^1.0.0",
+    "markdown-it": "^14.1.0",
+    "markdown-it-footnote": "^4.0.0",
+    "markdown-it-katex": "^2.0.3",
     "pinia": "^3.0.4",
+    "prismjs": "^1.29.0",
     "vue": "^3.5.38",
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.11",
+    "@types/markdown-it": "^14.2.0",
     "@types/node": "^24.13.2",
+    "@types/prismjs": "^1.26.6",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/tsconfig": "^0.9.1",
     "autoprefixer": "^10.5.0",

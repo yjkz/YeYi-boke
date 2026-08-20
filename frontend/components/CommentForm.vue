@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { Send } from 'lucide-vue-next'
 
-const props = defineProps<{ postSlug: string }>()
-const emit = defineEmits<{ (e: 'submitted'): void }>()
+const props = defineProps<{ postSlug: string; parentId?: number; replyingTo?: string; needReview?: boolean }>()
+const emit = defineEmits<{
+  (e: 'submitted'): void
+  (e: 'cancel-reply'): void
+}>()
 const api = useApi()
 
 const form = reactive({
@@ -25,6 +28,7 @@ const submit = async () => {
   try {
     await api.post('/comments', {
       post_slug: props.postSlug,
+      parent_id: props.parentId,
       nickname: form.nickname,
       email: form.email || undefined,
       website: form.website || undefined,
@@ -45,11 +49,15 @@ const submit = async () => {
   <div class="bg-rocom-surface-paper rounded-xl border border-rocom-outline p-5">
     <h3 class="text-sm font-bold text-rocom-text-strong mb-4">发表评论</h3>
 
-    <div v-if="submitted" class="text-sm text-rocom-success py-4 text-center" role="status">
-      评论已提交，等待审核后显示。
+      <div v-if="submitted" class="text-sm text-rocom-success py-4 text-center" role="status">
+      {{ props.needReview === false ? '评论已发布。' : '评论已提交，等待审核后显示。' }}
     </div>
 
     <form v-else @submit.prevent="submit" class="space-y-4">
+      <div v-if="props.replyingTo" class="flex items-center justify-between rounded-md bg-rocom-control px-3 py-2 text-xs text-rocom-text-secondary">
+        <span>正在回复：{{ props.replyingTo }}</span>
+        <button type="button" class="text-rocom-primary-outline hover:underline" @click="emit('cancel-reply')">取消回复</button>
+      </div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label for="comment-nickname" class="text-xs text-rocom-text-caption mb-1 block">昵称 *</label>

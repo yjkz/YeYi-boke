@@ -66,6 +66,36 @@
   color: inherit;
 }
 
+.prose .katex { color: inherit; }
+.prose .token.comment,
+.prose .token.prolog,
+.prose .token.doctype,
+.prose .token.cdata { color: var(--rocom-text-caption); }
+.prose .token.punctuation { color: var(--rocom-text-secondary); }
+.prose .token.property,
+.prose .token.tag,
+.prose .token.boolean,
+.prose .token.number,
+.prose .token.constant,
+.prose .token.symbol,
+.prose .token.deleted { color: var(--rocom-accent-orange); }
+.prose .token.selector,
+.prose .token.attr-name,
+.prose .token.string,
+.prose .token.char,
+.prose .token.builtin,
+.prose .token.inserted { color: var(--rocom-success); }
+.prose .token.operator,
+.prose .token.entity,
+.prose .token.url,
+.prose .language-css .token.string,
+.prose .style .token.string { color: var(--rocom-accent-blue); }
+.prose .token.atrule,
+.prose .token.attr-value,
+.prose .token.keyword { color: var(--rocom-primary-outline); }
+.prose .token.function,
+.prose .token.class-name { color: var(--rocom-primary-strong); }
+
 .prose ul, .prose ol {
   padding-left: 1.5em;
   margin-bottom: 1em;

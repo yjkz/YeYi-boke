@@ -10,6 +10,8 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "dompurify": "^3.4.14",
+    "isomorphic-dompurify": "^2.36.0",
     "katex": "^0.16.22",
     "lucide-vue-next": "^1.0.0",
     "markdown-it": "^14.1.0",

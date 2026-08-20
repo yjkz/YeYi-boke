@@ -7,7 +7,7 @@ const page = computed(() => Number(route.query.page) || 1)
 
 useHead({ title: computed(() => query.value ? `搜索: ${query.value}` : '搜索') })
 
-const { data: results } = await useAsyncData(
+const { data: results, status, error } = await useAsyncData(
   `search-${query.value}-${page.value}`,
   () => query.value ? api.get('/search', { q: query.value, page: page.value }) : null,
   { watch: [query, page] }
@@ -28,7 +28,9 @@ const goToPage = (p: number) => {
       搜索: <span class="text-rocom-primary">{{ query }}</span>
     </h1>
 
-    <div v-if="results?.items?.length" class="post-grid">
+    <p v-if="status === 'pending' && query" class="py-12 text-center text-rocom-text-muted">搜索中...</p>
+    <p v-else-if="error" class="py-12 text-center text-rocom-danger">搜索失败，请稍后重试。</p>
+    <div v-else-if="results?.items?.length" class="post-grid">
       <PostCard v-for="post in results.items" :key="post.id" :post="post" />
     </div>
     <p v-else-if="query" class="text-rocom-text-muted py-8 text-center">未找到相关文章</p>

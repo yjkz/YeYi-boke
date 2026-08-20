@@ -22,7 +22,8 @@ TestSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_com
 def mock_redis():
     with patch("app.modules.users.service.redis_client") as mock, \
          patch("app.modules.mcp.service.redis_client", mock), \
-         patch("app.mcp.auth.redis_client", mock):
+         patch("app.mcp.auth.redis_client", mock), \
+         patch("app.middleware.rate_limit.redis_client", mock):
         mock.set = AsyncMock()
         mock.get = AsyncMock(return_value=None)
         mock.delete = AsyncMock()

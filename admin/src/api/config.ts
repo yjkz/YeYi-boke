@@ -8,6 +8,7 @@ export interface SiteConfig {
   favicon_url: string
   about_content: string
   footer_text: string
+  announcement: string
   social_links: Record<string, string>
   comment_enabled: boolean
   comment_need_review: boolean

@@ -21,8 +21,9 @@ const navLinks = [
     </a>
 
     <div class="max-w-[1440px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-      <NuxtLink to="/" class="min-w-0 truncate text-xl font-bold text-rocom-text-strong tracking-wider">
-        {{ siteConfig?.site_title || 'YeYi 的博客' }}
+      <NuxtLink to="/" class="min-w-0 flex items-center gap-2 truncate text-xl font-bold text-rocom-text-strong tracking-wider">
+        <img v-if="siteConfig?.logo_url" :src="siteConfig.logo_url" :alt="siteConfig.site_title" class="h-8 max-w-32 object-contain" />
+        <span>{{ siteConfig?.site_title || 'YeYi 的博客' }}</span>
       </NuxtLink>
 
       <nav class="hidden md:flex shrink-0 items-center gap-0.5" aria-label="主导航">

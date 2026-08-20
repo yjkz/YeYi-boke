@@ -10,6 +10,7 @@ defineProps<{
   }
   depth?: number
 }>()
+const emit = defineEmits<{ (e: 'reply', value: { id: number; nickname: string }): void }>()
 
 const formatDate = (d: string) => new Date(d).toLocaleDateString('zh-CN')
 </script>
@@ -21,11 +22,13 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString('zh-CN')
       <span class="text-xs text-rocom-text-caption">{{ formatDate(comment.created_at) }}</span>
     </div>
     <p class="text-sm text-rocom-text-secondary whitespace-pre-wrap">{{ comment.content }}</p>
+    <button type="button" class="mt-2 text-xs text-rocom-primary-outline hover:underline" @click="emit('reply', { id: comment.id, nickname: comment.nickname })">回复</button>
     <CommentItem
       v-for="reply in comment.replies"
       :key="reply.id"
       :comment="reply"
       :depth="(depth || 0) + 1"
+      @reply="emit('reply', $event)"
     />
   </div>
 </template>
