@@ -44,6 +44,7 @@ jobs:
       - name: Build and push admin
         run: |
           docker build \
+            --build-arg VITE_BLOG_URL=https://blog.yeyeyiyi.online \
             -t crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-admin:${{ github.sha }} \
             -t crpi-mnquumysanjsxo76.cn-hangzhou.personal.cr.aliyuncs.com/yjkz/yeyi-boke-admin:latest \
             ./admin

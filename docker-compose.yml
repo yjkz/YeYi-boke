@@ -3,6 +3,8 @@ services:
     build:
       context: ./admin
       dockerfile: Dockerfile
+      args:
+        VITE_BLOG_URL: ${VITE_BLOG_URL:-http://localhost:3000}
     container_name: yeyi_blog_admin
     ports:
       - "3001:80"
