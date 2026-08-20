@@ -6,11 +6,12 @@ from app.dependencies import get_current_user, require_admin
 from app.modules.users.model import User
 from app.modules.users.schema import LoginRequest, PasswordChangeRequest, RefreshRequest, TokenResponse, UserResponse
 from app.modules.users.service import authenticate_user, change_password, create_tokens, invalidate_refresh_token, refresh_access_token, store_refresh_token, upload_image
+from app.middleware.rate_limit import rate_limit
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse, dependencies=[Depends(rate_limit(10, 60))])
 async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
     user = await authenticate_user(db, body.username, body.password)
     if not user:
@@ -50,7 +51,7 @@ async def update_password(body: PasswordChangeRequest, db: AsyncSession = Depend
 admin_router = APIRouter(prefix="/admin", tags=["admin"])
 
 
-@admin_router.post("/upload")
+@admin_router.post("/upload", dependencies=[Depends(rate_limit(50, 3600))])
 async def upload(file: UploadFile = File(...), _user: User = Depends(require_admin)):
     try:
         url = await upload_image(file)

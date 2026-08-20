@@ -44,6 +44,8 @@ token 机制：access 120 分钟；refresh 7 天且存于 Redis（`refresh_token
 **PostCreate**：`{title(必填1-200), slug?(缺省拼音生成), content_md?, excerpt?, cover_image?, category_id?, tag_ids?:[], is_top?:false}`。
 **PostUpdate**：全部字段 Optional；`content_md` 变更时服务端重渲染 `content_html` 并在未显式传 excerpt 时重新截取。
 
+Admin 编辑器自动保存复用上述 POST/PUT：新建页标题非空后创建 draft，已有 draft 按 2 秒防抖更新；已发布文章不会自动保存，需显式点击保存。自动保存不新增接口、请求字段或数据库表。`content_html` 已统一清洗，代码块保留语言 class，公式保留 `$ / $$` 语义标记。
+
 ## 4. 分类 / 标签管理（需 admin）
 
 | 方法 | 路径 | 请求体 | 说明 |
@@ -61,11 +63,13 @@ token 机制：access 120 分钟；refresh 7 天且存于 Redis（`refresh_token
 |------|------|------|-------------|------|
 | POST | `/comments` | 无 | `{post_slug, nickname(1-50), content(1-1000), email?, website?, parent_id?}` | `201`；站点配置 `comment_enabled=false` 时 403；文章不存在 404；落库为 **pending** |
 | GET | `/posts/{slug}/comments` | 无 | — | 已批准顶级评论数组，每条含 `replies[]` |
-| GET | `/admin/comments` | admin | `?status=&page=&page_size=` | 分页管理列表（含 pending/rejected） |
+| GET | `/admin/comments` | admin | `?status=&post_title=&page=&page_size=` | 分页管理列表（含 pending/rejected），响应含 `post_title`、`post_slug` |
 | PUT | `/admin/comments/{id}` | admin | `{status: "approved"|"rejected"|"pending"}` | 审核 |
 | DELETE | `/admin/comments/{id}` | admin | — | `204` |
 
 **CommentResponse**：`id, post_id, parent_id, nickname, email, website, content, status, created_at, replies[]`。
+
+评论创建时如果传入 `parent_id`，父评论必须存在且属于同一篇文章，否则返回 `400`。公开评论接口按 IP 限制为每分钟 5 次；搜索每分钟 30 次；登录每分钟 10 次；管理员上传每小时 50 次。限流 IP 优先取 `X-Real-IP`，其次取 `X-Forwarded-For` 首个地址。
 
 ## 6. 搜索 search
 

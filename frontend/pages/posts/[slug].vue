@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { enhanceContent, sanitizeContentHtml } from '~/composables/useContentEnhancements'
+
 const api = useApi()
 const route = useRoute()
 const slug = route.params.slug as string
+const contentRoot = ref<HTMLElement | null>(null)
 
 const { data: post } = await useAsyncData(
   `post-${slug}`,
@@ -22,9 +25,10 @@ const slugifyHeading = (value: string, index: number) => {
 
 const renderedContentHtml = computed(() => {
   if (!post.value?.content_html) return ''
+  const sourceHtml = sanitizeContentHtml(post.value.content_html)
   const usedIds = new Map<string, number>()
   let headingIndex = 0
-  return post.value.content_html.replace(/<h([2-3])([^>]*)>(.*?)<\/h\1>/gis, (full, level, attrs, inner) => {
+  return sourceHtml.replace(/<h([2-3])([^>]*)>(.*?)<\/h\1>/gis, (full, level, attrs, inner) => {
     const baseId = slugifyHeading(inner, headingIndex)
     const count = usedIds.get(baseId) || 0
     usedIds.set(baseId, count + 1)
@@ -45,6 +49,11 @@ const tocItems = computed(() => {
   return items
 })
 
+watch(renderedContentHtml, async () => {
+  await nextTick()
+  enhanceContent(contentRoot.value)
+}, { immediate: true })
+
 const activeToc = useState<{ id: string; text: string; level: number }[]>('active-post-toc', () => [])
 watch(tocItems, (items) => { activeToc.value = items }, { immediate: true })
 </script>
@@ -62,7 +71,7 @@ watch(tocItems, (items) => { activeToc.value = items }, { immediate: true })
         />
       </header>
 
-      <div class="prose" v-html="renderedContentHtml" />
+      <div ref="contentRoot" class="prose" v-html="renderedContentHtml" />
 
       <CommentSection :post-slug="slug" />
     </div>

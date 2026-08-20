@@ -11,6 +11,8 @@ export interface Comment {
   status: string
   visitor_ip: string | null
   created_at: string
+  post_title: string
+  post_slug: string
 }
 
 export const commentsApi = {

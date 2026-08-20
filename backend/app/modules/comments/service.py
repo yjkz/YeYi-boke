@@ -22,6 +22,13 @@ async def create_comment(
     if not post_id:
         return None
 
+    if parent_id is not None:
+        parent_result = await db.execute(
+            select(Comment.id).where(Comment.id == parent_id, Comment.post_id == post_id)
+        )
+        if parent_result.scalar_one_or_none() is None:
+            raise ValueError("Parent comment does not belong to this post")
+
     comment = Comment(
         post_id=post_id,
         parent_id=parent_id,
@@ -55,17 +62,35 @@ async def get_approved_comments(db: AsyncSession, post_slug: str) -> list[Commen
     return list(result.scalars().all())
 
 
-async def get_admin_comments(db: AsyncSession, offset: int = 0, limit: int = 20, status: str | None = None):
-    query = select(Comment)
+async def get_admin_comments(db: AsyncSession, offset: int = 0, limit: int = 20, status: str | None = None, post_title: str | None = None):
+    query = select(Comment, Post.title.label("post_title"), Post.slug.label("post_slug")).join(Post, Comment.post_id == Post.id)
     if status:
         query = query.where(Comment.status == status)
+    if post_title:
+        query = query.where(Post.title.ilike(f"%{post_title}%"))
     query = query.order_by(Comment.created_at.desc())
 
     count_query = select(func.count()).select_from(query.subquery())
     total = (await db.execute(count_query)).scalar()
 
     result = await db.execute(query.offset(offset).limit(limit))
-    return list(result.scalars().all()), total
+    items = []
+    for comment, title, slug in result.all():
+        items.append({
+            "id": comment.id,
+            "post_id": comment.post_id,
+            "parent_id": comment.parent_id,
+            "nickname": comment.nickname,
+            "email": comment.email,
+            "website": comment.website,
+            "content": comment.content,
+            "status": comment.status,
+            "visitor_ip": comment.visitor_ip,
+            "created_at": comment.created_at,
+            "post_title": title,
+            "post_slug": slug,
+        })
+    return items, total
 
 
 async def update_comment_status(db: AsyncSession, comment_id: int, status: str) -> Comment | None:

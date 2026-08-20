@@ -44,6 +44,52 @@ async def test_publish_post(client: AsyncClient, auth_headers):
 
 
 @pytest.mark.asyncio
+async def test_public_posts_filter_by_category_and_tag(client: AsyncClient, auth_headers):
+    category = await client.post(
+        "/api/v1/admin/categories",
+        json={"name": "Tech", "slug": "tech"},
+        headers=auth_headers,
+    )
+    tag = await client.post(
+        "/api/v1/admin/tags",
+        json={"name": "Python", "slug": "python"},
+        headers=auth_headers,
+    )
+    post = await client.post(
+        "/api/v1/admin/posts",
+        json={
+            "title": "Filtered",
+            "slug": "filtered",
+            "content_md": "content",
+            "category_id": category.json()["id"],
+            "tag_ids": [tag.json()["id"]],
+        },
+        headers=auth_headers,
+    )
+    await client.post(f"/api/v1/admin/posts/{post.json()['id']}/publish", headers=auth_headers)
+
+    category_result = await client.get("/api/v1/posts", params={"category": "tech"})
+    tag_result = await client.get("/api/v1/posts", params={"tag": "python"})
+
+    assert category_result.json()["total"] == 1
+    assert tag_result.json()["total"] == 1
+
+
+@pytest.mark.asyncio
+async def test_admin_posts_can_filter_by_status(client: AsyncClient, auth_headers):
+    response = await client.post(
+        "/api/v1/admin/posts",
+        json={"title": "Draft only", "slug": "draft-only", "content_md": "content"},
+        headers=auth_headers,
+    )
+
+    result = await client.get("/api/v1/admin/posts", params={"status": "draft"}, headers=auth_headers)
+
+    assert result.json()["total"] == 1
+    assert result.json()["items"][0]["id"] == response.json()["id"]
+
+
+@pytest.mark.asyncio
 async def test_rss_returns_published_posts(client: AsyncClient, auth_headers):
     create_resp = await client.post(
         "/api/v1/admin/posts",

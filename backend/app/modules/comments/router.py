@@ -7,22 +7,26 @@ from app.modules.config.service import get_all_config
 from app.modules.comments import service as comment_service
 from app.modules.comments.schema import AdminCommentListResponse, CommentCreate, CommentCreateResponse, CommentResponse, CommentUpdate
 from app.modules.users.model import User
+from app.middleware.rate_limit import rate_limit
 
 router = APIRouter(tags=["comments"])
 
 
-@router.post("/comments", response_model=CommentCreateResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/comments", response_model=CommentCreateResponse, status_code=status.HTTP_201_CREATED, dependencies=[Depends(rate_limit(5, 60))])
 async def create_comment(body: CommentCreate, request: Request, db: AsyncSession = Depends(get_db)):
     config = await get_all_config(db)
     if not config.get("comment_enabled", True):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Comments are disabled")
     comment_status = "pending" if config.get("comment_need_review", True) else "approved"
-    comment = await comment_service.create_comment(
-        db, post_slug=body.post_slug, nickname=body.nickname, content=body.content,
-        email=body.email, website=body.website, parent_id=body.parent_id,
-        visitor_ip=request.client.host if request.client else None,
-        status=comment_status,
-    )
+    try:
+        comment = await comment_service.create_comment(
+            db, post_slug=body.post_slug, nickname=body.nickname, content=body.content,
+            email=body.email, website=body.website, parent_id=body.parent_id,
+            visitor_ip=request.client.host if request.client else None,
+            status=comment_status,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
     if not comment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     return comment
@@ -37,10 +41,11 @@ async def get_comments(slug: str, db: AsyncSession = Depends(get_db)):
 async def admin_list_comments(
     pagination: Pagination = Depends(),
     comment_status: str | None = Query(None, alias="status"),
+    post_title: str | None = Query(None, min_length=1, max_length=200),
     db: AsyncSession = Depends(get_db),
     _user: User = Depends(require_admin),
 ):
-    items, total = await comment_service.get_admin_comments(db, offset=pagination.offset, limit=pagination.page_size, status=comment_status)
+    items, total = await comment_service.get_admin_comments(db, offset=pagination.offset, limit=pagination.page_size, status=comment_status, post_title=post_title)
     return {"items": items, "total": total, "page": pagination.page, "page_size": pagination.page_size}
 
 

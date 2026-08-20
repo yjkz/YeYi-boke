@@ -67,6 +67,8 @@ class AdminCommentResponse(BaseModel):
     status: str
     visitor_ip: str | None
     created_at: datetime
+    post_title: str
+    post_slug: str
 
     model_config = {"from_attributes": True}
 

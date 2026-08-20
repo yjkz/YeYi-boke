@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { configApi, type SiteConfig } from '@/api/config'
 import api from '@/api/index'
 import { ElMessage } from 'element-plus'
@@ -10,6 +10,7 @@ const form = ref<SiteConfig>({
   logo_url: '',
   avatar_url: '',
   favicon_url: '',
+  announcement: '',
   about_content: '',
   footer_text: '',
   social_links: {},
@@ -56,6 +57,16 @@ const handleAvatarUpload = async (options: any) => {
   form.value.avatar_url = data.url
   ElMessage.success('头像已上传')
 }
+
+const addSocialLink = () => { form.value.social_links = { ...form.value.social_links, '': '' } }
+const socialEntries = computed(() => Object.entries(form.value.social_links || {}))
+const updateSocialKey = (oldKey: string, newKey: string, value: string) => {
+  const next = { ...form.value.social_links }
+  delete next[oldKey]
+  next[newKey] = value
+  form.value.social_links = next
+}
+const removeSocialLink = (key: string) => { const next = { ...form.value.social_links }; delete next[key]; form.value.social_links = next }
 </script>
 
 <template>
@@ -63,6 +74,7 @@ const handleAvatarUpload = async (options: any) => {
     <el-form label-position="top">
       <el-form-item label="站点标题"><el-input v-model="form.site_title" /></el-form-item>
       <el-form-item label="副标题"><el-input v-model="form.site_subtitle" /></el-form-item>
+      <el-form-item label="公告"><el-input v-model="form.announcement" type="textarea" :rows="3" placeholder="显示在前台首页和侧栏" /></el-form-item>
 
       <el-form-item label="侧栏头像">
         <div class="flex items-center gap-3 w-full">
@@ -100,6 +112,16 @@ const handleAvatarUpload = async (options: any) => {
       </el-form-item>
 
       <el-form-item label="页脚文字"><el-input v-model="form.footer_text" /></el-form-item>
+      <el-form-item label="社交链接">
+        <div class="w-full space-y-2">
+          <div v-for="[key, value] in socialEntries" :key="key + value" class="flex gap-2">
+            <el-input :model-value="key" placeholder="名称" class="w-32" @change="(newKey: string | number) => updateSocialKey(key, String(newKey), value)" />
+            <el-input :model-value="value" placeholder="URL" class="flex-1" @update:model-value="(newValue: string | number) => form.social_links[key] = String(newValue)" />
+            <el-button type="danger" link @click="removeSocialLink(key)">删除</el-button>
+          </div>
+          <el-button link type="primary" @click="addSocialLink">添加链接</el-button>
+        </div>
+      </el-form-item>
       <el-form-item label="开启评论"><el-switch v-model="form.comment_enabled" /></el-form-item>
       <el-form-item label="评论需审核"><el-switch v-model="form.comment_need_review" /></el-form-item>
       <el-form-item>

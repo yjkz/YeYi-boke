@@ -6,12 +6,14 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 const posts = ref<Post[]>([])
 const total = ref(0)
 const page = ref(1)
+const pageSize = ref(20)
+const statusFilter = ref('')
 const loading = ref(false)
 
 const fetchPosts = async () => {
   loading.value = true
   try {
-    const { data } = await postsApi.list({ page: page.value, page_size: 20 })
+    const { data } = await postsApi.list({ page: page.value, page_size: pageSize.value, status: statusFilter.value || undefined })
     posts.value = data.items
     total.value = data.total
   } finally {
@@ -43,9 +45,15 @@ onMounted(fetchPosts)
 
 <template>
   <div>
-    <div class="mb-4 flex justify-between items-center">
+    <div class="mb-4 flex flex-wrap gap-3 justify-between items-center">
       <h3 class="text-lg font-semibold">文章列表</h3>
-      <el-button type="primary" @click="$router.push('/posts/new')">新建文章</el-button>
+      <div class="flex flex-wrap gap-2">
+        <el-select v-model="statusFilter" clearable placeholder="筛选状态" class="w-32" @change="page = 1; fetchPosts()">
+          <el-option label="草稿" value="draft" /><el-option label="已发布" value="published" />
+        </el-select>
+        <el-button @click="statusFilter = ''; page = 1; fetchPosts()">重置</el-button>
+        <el-button type="primary" @click="$router.push('/posts/new')">新建文章</el-button>
+      </div>
     </div>
 
     <el-table :data="posts" v-loading="loading" stripe>
@@ -77,10 +85,12 @@ onMounted(fetchPosts)
     <el-pagination
       v-model:current-page="page"
       :total="total"
-      :page-size="20"
-      layout="prev, pager, next"
+      v-model:page-size="pageSize"
+      :page-sizes="[10, 20, 50]"
+      layout="total, sizes, prev, pager, next"
       class="mt-4 justify-center"
       @current-change="fetchPosts"
+      @size-change="page = 1; fetchPosts()"
     />
   </div>
 </template>

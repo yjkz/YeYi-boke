@@ -15,13 +15,32 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+let refreshPromise: Promise<string> | null = null
+
+const refreshAccessToken = async () => {
+  const auth = useAuthStore()
+  if (!auth.refreshToken) throw new Error('Missing refresh token')
+  if (!refreshPromise) {
+    refreshPromise = auth.refresh().finally(() => { refreshPromise = null })
+  }
+  return refreshPromise
+}
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      const auth = useAuthStore()
-      auth.logout()
-      router.push('/login')
+  async (error) => {
+    const original = error.config
+    if (error.response?.status === 401 && original && !original._retry && !String(original.url || '').includes('/auth/refresh')) {
+      original._retry = true
+      try {
+        const token = await refreshAccessToken()
+        original.headers.Authorization = `Bearer ${token}`
+        return api(original)
+      } catch {
+        const auth = useAuthStore()
+        auth.logout()
+        router.push('/login')
+      }
     }
     return Promise.reject(error)
   },
