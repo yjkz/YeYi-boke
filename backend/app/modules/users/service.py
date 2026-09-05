@@ -71,7 +71,7 @@ ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico"}
 async def upload_image_bytes(content: bytes, filename: str) -> str:
     ext = os.path.splitext(filename)[1].lower()
     if ext not in ALLOWED_IMAGE_EXTENSIONS:
-        raise ValueError(f"unsupported image type: {ext}")
+        raise ValueError(f"unsupported image type: {ext or '(missing)'}")
     filename = f"{uuid.uuid4().hex}{ext}"
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     filepath = os.path.join(settings.UPLOAD_DIR, filename)

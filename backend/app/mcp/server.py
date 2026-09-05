@@ -439,10 +439,14 @@ def decode_base64_payload(payload: str) -> bytes:
 async def upload_image(filename: str, content_base64: str) -> UploadResult:
     if not filename or os.path.basename(filename) != filename or any(separator in filename for separator in ("/", "\\")) or filename in {".", ".."}:
         raise ValueError("filename must be a simple file name")
-    payload = _normalize_base64_payload(content_base64)
     max_encoded = ((settings.MAX_UPLOAD_SIZE + 2) // 3) * 4
+    limit_error = f"content_base64 exceeds the {settings.MAX_UPLOAD_SIZE} byte upload limit"
+    # cheap guard: fail fast on oversized raw payloads before whitespace normalization
+    if len(content_base64) > max_encoded * 2:
+        raise ValueError(limit_error)
+    payload = _normalize_base64_payload(content_base64)
     if len(payload) > max_encoded:
-        raise ValueError(f"content_base64 exceeds the {settings.MAX_UPLOAD_SIZE} byte upload limit")
+        raise ValueError(limit_error)
     try:
         content = decode_base64_payload(payload)
     except ValueError as exc:

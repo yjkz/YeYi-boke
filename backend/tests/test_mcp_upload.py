@@ -74,6 +74,14 @@ async def test_upload_accepts_missing_padding(upload_dir):
 
 @pytest.mark.no_db
 @pytest.mark.asyncio
+async def test_upload_rejects_whitespace_only_payload_as_empty(upload_dir):
+    with pytest.raises(ValueError, match="content_base64 is empty"):
+        await upload_image("ok.png", "   \n  ")
+    assert list(upload_dir.iterdir()) == []
+
+
+@pytest.mark.no_db
+@pytest.mark.asyncio
 async def test_upload_still_rejects_truly_invalid_base64(upload_dir):
     for payload in ("not-base64!", "====", "QUJDR"):  # 非法字符 / 纯 padding / 长度 %4==1
         with pytest.raises(ValueError, match="invalid"):
