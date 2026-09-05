@@ -82,6 +82,7 @@ Admin 编辑器自动保存复用上述 POST/PUT：新建页标题非空后创�
 | 方法 | 路径 | 认证 | 请求体/参数 | 响应 |
 |------|------|------|-------------|------|
 | POST | `/visit` | 无 | `{page_path, page_title?}`（IP/UA/Referer 自动采集） | `204` |
+| GET | `/stats/summary` | 无 | — | 公开聚合：`{today_pv, published_posts, categories, tags, approved_comments}`（前台侧栏使用） |
 | GET | `/admin/stats` | admin | — | `{today_pv, total_posts, total_comments}` |
 | GET | `/admin/stats/trend` | admin | `days`(1-90, 默认7) | `{data: [{date, page_views, unique_visitors}]}` |
 
