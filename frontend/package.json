@@ -5,6 +5,7 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
+    "font:build": "node scripts/font-build.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
@@ -25,6 +26,7 @@
     "@nuxtjs/tailwindcss": "^6.13.1",
     "@types/markdown-it": "^14.1.2",
     "@types/prismjs": "^1.26.6",
+    "cn-font-split": "^7.4.3",
     "nuxt": "^3.17.5",
     "typescript": "^5.8.3"
   }

@@ -33,18 +33,10 @@ export default defineNuxtConfig({
         { property: 'og:type', content: 'website' },
         { name: 'theme-color', content: '#F8F7F4' },
       ],
-      link: [
-        {
-          rel: 'preload',
-          href: '/fonts/AlimamaFangYuanTi.otf',
-          as: 'font',
-          type: 'font/otf',
-          crossorigin: '',
-        },
-      ],
     },
   },
 
-  css: ['~/assets/css/main.css'],
+  // font-split.css 由 npm run font:build 生成，含 woff2 分片的 @font-face + unicode-range
+  css: ['~/assets/css/main.css', '~/assets/css/font-split.css'],
   compatibilityDate: '2024-07-01',
 })

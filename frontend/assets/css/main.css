@@ -1,12 +1,6 @@
 @import './typography.css';
-
-@font-face {
-  font-family: "Alimama FangYuanTi";
-  src: url("/fonts/AlimamaFangYuanTi.otf") format("opentype");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
+/* 阿里妈妈方圆体改为构建时子集化的 woff2 分片（unicode-range 按需加载），
+   @font-face 由 assets/css/font-split.css 提供（npm run font:build 生成） */
 
 :root {
   --rocom-bg: #F8F7F4;
