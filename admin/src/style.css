@@ -2,13 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: "Alimama FangYuanTi";
-  src: url("/fonts/AlimamaFangYuanTi.otf") format("opentype");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
+/* 阿里妈妈方圆体改为构建时子集化的 woff2 分片（unicode-range 按需加载），
+   @font-face 在 src/font-split.css（npm run font:build 生成，main.ts 引入） */
 
 :root {
   --rocom-bg: #F8F7F4;

@@ -48,6 +48,7 @@ A 阶段“功能完整性 + 稳定性”已完成实现与验证。B 阶段“�
 - B 阶段已完成后端 Markdown 清洗、代码语言 class、`$...$`/`$$...$$` 公式语义标记，以及前台 Prism/KaTeX 增强渲染；未新增文章 CRUD 接口、数据库表或迁移。
 - 已修复首页及搜索列表摘要显示 Markdown 源格式的问题：摘要统一从渲染后的 Markdown HTML 提取纯文本，历史摘要在列表读取时自动规范化；Compose 真实 API 验证通过。
 - B 阶段验证结果：后端全量 `32 passed`；Markdown 专项 `3 passed`；admin 和 frontend 构建、Compose 重建及真实 API 摘要回归均通过。
+- 字体分片优化已完成：阿里妈妈方圆体从 2.66MB 整包 OTF（实测下载 6.8s）改为构建时 `cn-font-split` 子集化的 40 个 woff2 分片（共 1.07MB、最大单片 43.9KB），`unicode-range` 按需加载，首屏只需数个小分片；`deploy/gateway.conf` 对 `/fonts/` 加一年 `immutable` 长缓存。两端 `npm run font:build` + `npm run build` 均通过。
 
 ### 当前阻塞/未完成
 

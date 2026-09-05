@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# 字体分片产物（npm run font:build 生成，构建时产出）
+public/fonts/fangyuan/
