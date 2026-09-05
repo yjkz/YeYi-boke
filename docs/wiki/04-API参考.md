@@ -100,7 +100,7 @@ Admin 编辑器自动保存复用上述 POST/PUT：新建页标题非空后创�
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| POST | `/admin/upload` | `multipart/form-data`，字段名 `file`；扩展名仅允许 `.png/.jpg/.jpeg/.gif/.webp/.ico`（大小写不敏感），其余返回 400 `unsupported image type: <ext>`；uuid 重命名落盘 `uploads/`；>5MB 返回 400；响应 `{url: "/uploads/xxx.png"}` |
+| POST | `/admin/upload` | `multipart/form-data`，字段名 `file`；扩展名仅允许 `.png/.jpg/.jpeg/.gif/.webp/.ico`（大小写不敏感），其余返回 400 `unsupported image type: <ext>`（不再静默存为 `.bin`，封堵 `.html`/`.svg` 存储型 XSS；与 MCP 上传共用同一白名单实现）；uuid 重命名落盘 `uploads/`；>5MB 返回 400；响应 `{url: "/uploads/xxx.png"}` |
 | GET | `/uploads/{filename}` | 静态文件服务（FastAPI StaticFiles / Nginx 反代） |
 | GET | `/health`（无 `/api/v1` 前缀） | `{status: "ok"}`，健康检查 |
 
@@ -118,7 +118,7 @@ MCP 独立入口：`https://blogmcp.yeyeyiyi.online/mcp`。客户端可使用 `h
 - 分类/标签：`yeyi_blog_list_categories`、`yeyi_blog_create_category`、`yeyi_blog_update_category`、`yeyi_blog_delete_category`、`yeyi_blog_list_tags`、`yeyi_blog_create_tag`、`yeyi_blog_update_tag`、`yeyi_blog_delete_tag`
 - 评论：`yeyi_blog_list_comments`、`yeyi_blog_create_comment`、`yeyi_blog_update_comment_status`、`yeyi_blog_delete_comment`
 - 配置/统计：`yeyi_blog_get_site_config`、`yeyi_blog_update_site_config`、`yeyi_blog_get_stats_overview`、`yeyi_blog_get_stats_trend`
-- 上传：`yeyi_blog_upload_image(filename, content_base64)`；`content_base64` 接受标准/URL-safe 字母表、可缺省 padding，可含换行/空白与 `data:image/*;base64,` 前缀；解码前按 `MAX_UPLOAD_SIZE`（默认 5MB）限制；`filename` 扩展名仅允许 `.png/.jpg/.jpeg/.gif/.webp/.ico`，其余报 `unsupported image type`
+- 上传：`yeyi_blog_upload_image(filename, content_base64)`；`content_base64` 接受标准/URL-safe 字母表、可缺省 padding，可含换行/空白与 `data:image/*;base64,` 前缀；解码前按 `MAX_UPLOAD_SIZE`（默认 5MB）限制；`filename` 扩展名仅允许 `.png/.jpg/.jpeg/.gif/.webp/.ico`（与 admin REST `/admin/upload` 共用同一实现），其余报 `unsupported image type`。MCP 服务请求体上限为「base64 膨胀后体积 + 64KB JSON 包络」（默认约 7.05MB；mcp SDK 1.29 默认 4MiB 曾拦截 5MB 图的 base64 请求体），网关 blogmcp 块 `client_max_body_size 12m` 兜底；MCP 域名下 `/uploads/` 由网关回源 backend，上传返回的 URL 可直接访问
 
 删除工具均要求 `confirm=true`。评论未显式指定状态时遵循 `comment_need_review` 配置。
 
