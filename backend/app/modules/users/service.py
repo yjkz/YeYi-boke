@@ -1,5 +1,4 @@
 import os
-import re
 import uuid
 
 from fastapi import UploadFile
@@ -66,10 +65,13 @@ async def upload_image(file: UploadFile) -> str:
     return await upload_image_bytes(content, file.filename or "upload.png")
 
 
+ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico"}
+
+
 async def upload_image_bytes(content: bytes, filename: str) -> str:
-    ext = os.path.splitext(filename)[1].lower() or ".png"
-    if not re.fullmatch(r"\.[a-z0-9]{1,10}", ext):
-        ext = ".bin"
+    ext = os.path.splitext(filename)[1].lower()
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        raise ValueError(f"unsupported image type: {ext}")
     filename = f"{uuid.uuid4().hex}{ext}"
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     filepath = os.path.join(settings.UPLOAD_DIR, filename)
