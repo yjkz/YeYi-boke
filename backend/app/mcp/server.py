@@ -4,6 +4,7 @@ import asyncio
 import functools
 import logging
 import os
+import re
 import time
 from contextlib import asynccontextmanager
 from typing import Any, Literal
@@ -31,7 +32,7 @@ from app.modules.posts.schema import (
     TagResponse,
 )
 from app.modules.stats import service as stats_service
-from app.modules.users.service import upload_image_bytes
+from app.modules.users.service import ALLOWED_IMAGE_EXTENSIONS, upload_image_bytes
 from app.mcp.schema import (
     CategoryPage, CommentPage, DeleteCategoryResult, DeleteCommentResult, DeletePostResult,
     DeleteTagResult, MCPCommentCreate, MCPCategoryCreate, MCPConfigPatch, MCPPostCreate,
@@ -391,17 +392,60 @@ async def get_stats_trend(days: int = 7) -> StatsTrend:
         return StatsTrend(data=await stats_service.get_stats_trend(db, days), days=days)
 
 
-@mcp.tool(name="yeyi_blog_upload_image", description="Upload an image from Base64 content. Filename must be a simple file name and decoded content must fit the configured upload limit.", annotations=WRITE, structured_output=True)
+_DATA_URI_RE = re.compile(r"^data:[\w.+-]+/[\w.+-]+;base64,")
+
+
+def _normalize_base64_payload(raw: str) -> str:
+    """Strip an optional data URI prefix and all whitespace from a base64 payload."""
+    payload = re.sub(r"\s+", "", raw)
+    match = _DATA_URI_RE.match(payload)
+    return payload[match.end():] if match else payload
+
+
+def _strict_b64decode(text: str) -> bytes | None:
+    try:
+        return base64.b64decode(text, validate=True)
+    except (ValueError, binascii.Error):
+        return None
+
+
+def decode_base64_payload(payload: str) -> bytes:
+    """Decode a normalized base64 payload, tolerating URL-safe alphabets and missing padding."""
+    candidates = [payload]
+    if "-" in payload or "_" in payload:
+        candidates.append(payload.replace("-", "+").replace("_", "/"))
+    for candidate in candidates:
+        decoded = _strict_b64decode(candidate)
+        if decoded is None and len(candidate) % 4 in (2, 3):
+            decoded = _strict_b64decode(candidate + "=" * (-len(candidate) % 4))
+        if decoded is not None:
+            return decoded
+    raise ValueError("content_base64 is invalid")
+
+
+@mcp.tool(
+    name="yeyi_blog_upload_image",
+    description=(
+        "Upload an image from Base64 content. Filename must be a simple file name with an allowed image extension "
+        f"({'/'.join(sorted(ALLOWED_IMAGE_EXTENSIONS))}); decoded content must be at most {settings.MAX_UPLOAD_SIZE} bytes. "
+        "content_base64 accepts standard or URL-safe base64 with optional padding, embedded whitespace or newlines, "
+        "and an optional data URI prefix (data:image/png;base64,...). The base64 text is about 4/3 of the decoded "
+        "size and must also fit the gateway request body limit."
+    ),
+    annotations=WRITE,
+    structured_output=True,
+)
 @audited
 async def upload_image(filename: str, content_base64: str) -> UploadResult:
     if not filename or os.path.basename(filename) != filename or any(separator in filename for separator in ("/", "\\")) or filename in {".", ".."}:
         raise ValueError("filename must be a simple file name")
+    payload = _normalize_base64_payload(content_base64)
     max_encoded = ((settings.MAX_UPLOAD_SIZE + 2) // 3) * 4
-    if len(content_base64) > max_encoded:
+    if len(payload) > max_encoded:
         raise ValueError(f"content_base64 exceeds the {settings.MAX_UPLOAD_SIZE} byte upload limit")
     try:
-        content = base64.b64decode(content_base64, validate=True)
-    except (ValueError, binascii.Error) as exc:
+        content = decode_base64_payload(payload)
+    except ValueError as exc:
         raise ValueError("content_base64 is invalid") from exc
     if not content:
         raise ValueError("content_base64 is empty")
