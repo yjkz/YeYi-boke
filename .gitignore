@@ -12,3 +12,5 @@ build/
 *.sqlite3
 CLAUDE.md
 .gitea
+/uploads/
+.superpowers/

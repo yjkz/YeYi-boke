@@ -49,6 +49,9 @@ A 阶段“功能完整性 + 稳定性”已完成实现与验证。B 阶段“�
 - 已修复首页及搜索列表摘要显示 Markdown 源格式的问题：摘要统一从渲染后的 Markdown HTML 提取纯文本，历史摘要在列表读取时自动规范化；Compose 真实 API 验证通过。
 - B 阶段验证结果：后端全量 `32 passed`；Markdown 专项 `3 passed`；admin 和 frontend 构建、Compose 重建及真实 API 摘要回归均通过。
 - 字体分片优化已完成：阿里妈妈方圆体从 2.66MB 整包 OTF（实测下载 6.8s）改为构建时 `cn-font-split` 子集化的 40 个 woff2 分片（共 1.07MB、最大单片 43.9KB），`unicode-range` 按需加载，首屏只需数个小分片；`deploy/gateway.conf` 对 `/fonts/` 加一年 `immutable` 长缓存。两端 `npm run font:build` + `npm run build` 均通过。
+- 2026-09-05 批次：MCP 图片上传链路已修复——`content_base64` 宽容解析（支持 `data:image/*;base64,` 前缀、嵌入空白/换行、URL-safe 字母表与缺省 padding 自动补齐）；上传扩展名白名单 `.png/.jpg/.jpeg/.gif/.webp/.ico` 由 MCP 与 admin REST 共用（`upload_image_bytes`），其余扩展名报 `unsupported image type: <ext>`，不再静默存为 `.bin`，封堵 `.html`/`.svg` 存储型 XSS；`deploy/gateway.conf` 的 blogmcp 块新增 `/uploads/` 路由（上传返回的 URL 原在 MCP 域名 404）。
+- 2026-09-05 批次：MCP 服务请求体上限已与上传上限对齐——`FastMCP(max_request_body_size)` 设为 base64 膨胀后体积 + 64KB（`MAX_UPLOAD_SIZE=5MB` 时约 7.05MB），修复 mcp SDK 1.29 默认 4MiB 在应用层拦截 5MB 图 base64 请求体的问题；网关 blogmcp 块 `client_max_body_size 12m` 兜底，保持「应用层先拒绝、网关兜底」层次。
+- 2026-09-05 批次：字体分片构建链加固——frontend/admin Dockerfile builder 由 `node:24-alpine` 换为 `node:24-slim`（cn-font-split 原生内核不兼容 musl），内核 7.6.8 显式下载并 sha256 校验；`font:build` 脚本末尾 `process.exit(0)`，修复原生内核残留句柄导致容器内构建挂死；本地开发/新 clone 需先各跑一次 `npm run font:build`，分片产物不入 git。已知取舍：Nuxt `inlineStyles` 把全局 CSS 内联进 SSR HTML，`font-split.css` 约增 8-10KB(gzip)/页，改外链属后续优化。
 
 ### 当前阻塞/未完成
 

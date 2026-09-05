@@ -3,7 +3,7 @@
 - **Base URL**：`/api/v1`（网关域名下同域访问；健康检查 `/health` 无前缀）
 - **认证方式**：管理接口需 `Authorization: Bearer <access_token>`，且 `role=admin`
 - **分页约定**：`?page=1&page_size=10`（page_size 上限 100）；MCP 列表响应统一 `{items, total, page, page_size, count, has_more, next_offset}`
-- **通用错误**：400 参数/业务错误 · 401 未认证或 token 失效 · 403 权限不足（或评论关闭） · 404 不存在 · 409 slug 冲突 · 429 限流（预留）
+- **通用错误**：400 参数/业务错误 · 401 未认证或 token 失效 · 403 权限不足（或评论关闭） · 404 不存在 · 409 slug 冲突 · 429 限流超限（登录/评论/搜索/上传已挂载，见 §5）
 
 ## 1. 认证 users（`/auth`）
 
@@ -22,7 +22,7 @@ token 机制：access 120 分钟；refresh 7 天且存于 Redis（`refresh_token
 | 方法 | 路径 | 参数 | 说明 |
 |------|------|------|------|
 | GET | `/posts` | `page, page_size, category=<slug>, tag=<slug>, sort=default|latest` | 仅 published；默认排序为置顶优先、发布时间倒序；`sort=latest` 忽略置顶权重，严格按发布时间倒序（同时间按 id 倒序） |
-| GET | `/posts/{slug}` | — | 详情（含 content_html、category、tags）；非 published 404；同 IP 1 小时内浏览量只计一次 |
+| GET | `/posts/{slug}` | — | 详情（含 content_html、category、tags）；非 published 404；浏览量防刷按 `request.client.host` 去重（已知限制：网关反代后为网关 IP，全站每文每小时最多 +1） |
 | GET | `/categories` | — | 全部分类，按 `sort_order, id` |
 | GET | `/tags` | — | 全部标签，按 id |
 | GET | `/rss.xml` | — | `application/rss+xml`，最近 20 篇已发布；接口保留，前台导航暂不显示入口 |
@@ -61,10 +61,10 @@ Admin 编辑器自动保存复用上述 POST/PUT：新建页标题非空后创�
 
 | 方法 | 路径 | 认证 | 请求体/参数 | 说明 |
 |------|------|------|-------------|------|
-| POST | `/comments` | 无 | `{post_slug, nickname(1-50), content(1-1000), email?, website?, parent_id?}` | `201`；站点配置 `comment_enabled=false` 时 403；文章不存在 404；落库为 **pending** |
+| POST | `/comments` | 无 | `{post_slug, nickname(1-50), content(1-2000), email?, website?, parent_id?}` | `201`；站点配置 `comment_enabled=false` 时 403；文章不存在 404；落库为 **pending** |
 | GET | `/posts/{slug}/comments` | 无 | — | 已批准顶级评论数组，每条含 `replies[]` |
 | GET | `/admin/comments` | admin | `?status=&post_title=&page=&page_size=` | 分页管理列表（含 pending/rejected），响应含 `post_title`、`post_slug` |
-| PUT | `/admin/comments/{id}` | admin | `{status: "approved"|"rejected"|"pending"}` | 审核 |
+| PUT | `/admin/comments/{id}` | admin | `{status: "approved"|"rejected"}` | 审核；REST 不支持传 `pending`（422），改回待审仅 MCP 工具 `yeyi_blog_update_comment_status` 支持 |
 | DELETE | `/admin/comments/{id}` | admin | — | `204` |
 
 **CommentResponse**：`id, post_id, parent_id, nickname, email, website, content, status, created_at, replies[]`。
@@ -82,6 +82,7 @@ Admin 编辑器自动保存复用上述 POST/PUT：新建页标题非空后创�
 | 方法 | 路径 | 认证 | 请求体/参数 | 响应 |
 |------|------|------|-------------|------|
 | POST | `/visit` | 无 | `{page_path, page_title?}`（IP/UA/Referer 自动采集） | `204` |
+| GET | `/stats/summary` | 无 | — | 公开聚合：`{today_pv, published_posts, categories, tags, approved_comments}`（前台侧栏使用） |
 | GET | `/admin/stats` | admin | — | `{today_pv, total_posts, total_comments}` |
 | GET | `/admin/stats/trend` | admin | `days`(1-90, 默认7) | `{data: [{date, page_views, unique_visitors}]}` |
 
@@ -93,13 +94,13 @@ Admin 编辑器自动保存复用上述 POST/PUT：新建页标题非空后创�
 | GET | `/site/announcement` | 无 | — | `{content: string}` |
 | PUT | `/admin/site/config` | admin | 任意配置键的部分对象 | upsert 后返回全量配置 |
 
-配置键清单：`site_title, site_subtitle, logo_url, favicon_url, announcement, about_content, footer_text, social_links, comment_enabled, comment_need_review`。
+配置键清单：`site_title, site_subtitle, logo_url, avatar_url, favicon_url, announcement, about_content, footer_text, social_links, comment_enabled, comment_need_review`。
 
 ## 9. 上传与静态资源（需 admin）
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| POST | `/admin/upload` | `multipart/form-data`，字段名 `file`；扩展名仅允许 `.png/.jpg/.jpeg/.gif/.webp/.ico`（大小写不敏感），其余返回 400 `unsupported image type: <ext>`；uuid 重命名落盘 `uploads/`；>5MB 返回 400；响应 `{url: "/uploads/xxx.png"}` |
+| POST | `/admin/upload` | `multipart/form-data`，字段名 `file`；扩展名仅允许 `.png/.jpg/.jpeg/.gif/.webp/.ico`（大小写不敏感），其余返回 400 `unsupported image type: <ext>`（不再静默存为 `.bin`，封堵 `.html`/`.svg` 存储型 XSS；与 MCP 上传共用同一白名单实现）；uuid 重命名落盘 `uploads/`；>5MB 返回 400；响应 `{url: "/uploads/xxx.png"}` |
 | GET | `/uploads/{filename}` | 静态文件服务（FastAPI StaticFiles / Nginx 反代） |
 | GET | `/health`（无 `/api/v1` 前缀） | `{status: "ok"}`，健康检查 |
 
@@ -109,7 +110,7 @@ FastAPI 自动生成：`/docs`（Swagger UI）与 `/redoc`。本地启动 backen
 
 ## 11. MCP 管理接口
 
-MCP 独立入口：`https://blogmcp.yeyeyiyi.online/mcp`。客户端可使用 `https://blogmcp.yeyeyiyi.online/mcp?tavilyApiKey=<key>` 接入，也兼容 `X-MCP-API-Key` 请求头；使用 Streamable HTTP transport。
+MCP 独立入口：`https://blogmcp.yeyeyiyi.online/mcp`。客户端可使用 `https://blogmcp.yeyeyiyi.online/mcp?tavilyApiKey=<key>` 接入，也支持 `?api_key=<key>` 查询参数或 `X-MCP-API-Key` 请求头；使用 Streamable HTTP transport。
 
 可用工具（均带 `yeyi_blog_` 前缀，并通过 MCP ToolAnnotations 标记只读/幂等/破坏性行为）：
 
@@ -117,7 +118,7 @@ MCP 独立入口：`https://blogmcp.yeyeyiyi.online/mcp`。客户端可使用 `h
 - 分类/标签：`yeyi_blog_list_categories`、`yeyi_blog_create_category`、`yeyi_blog_update_category`、`yeyi_blog_delete_category`、`yeyi_blog_list_tags`、`yeyi_blog_create_tag`、`yeyi_blog_update_tag`、`yeyi_blog_delete_tag`
 - 评论：`yeyi_blog_list_comments`、`yeyi_blog_create_comment`、`yeyi_blog_update_comment_status`、`yeyi_blog_delete_comment`
 - 配置/统计：`yeyi_blog_get_site_config`、`yeyi_blog_update_site_config`、`yeyi_blog_get_stats_overview`、`yeyi_blog_get_stats_trend`
-- 上传：`yeyi_blog_upload_image(filename, content_base64)`；`content_base64` 接受标准/URL-safe 字母表、可缺省 padding，可含换行/空白与 `data:image/*;base64,` 前缀；解码前按 `MAX_UPLOAD_SIZE`（默认 5MB）限制；`filename` 扩展名仅允许 `.png/.jpg/.jpeg/.gif/.webp/.ico`，其余报 `unsupported image type`
+- 上传：`yeyi_blog_upload_image(filename, content_base64)`；`content_base64` 接受标准/URL-safe 字母表、可缺省 padding，可含换行/空白与 `data:image/*;base64,` 前缀；解码前按 `MAX_UPLOAD_SIZE`（默认 5MB）限制；`filename` 扩展名仅允许 `.png/.jpg/.jpeg/.gif/.webp/.ico`（与 admin REST `/admin/upload` 共用同一实现），其余报 `unsupported image type`。MCP 服务请求体上限为「base64 膨胀后体积 + 64KB JSON 包络」（默认约 7.05MB；mcp SDK 1.29 默认 4MiB 曾拦截 5MB 图的 base64 请求体），网关 blogmcp 块 `client_max_body_size 12m` 兜底；MCP 域名下 `/uploads/` 由网关回源 backend，上传返回的 URL 可直接访问
 
 删除工具均要求 `confirm=true`。评论未显式指定状态时遵循 `comment_need_review` 配置。
 
@@ -141,7 +142,6 @@ MCP 独立入口：`https://blogmcp.yeyeyiyi.online/mcp`。客户端可使用 `h
 - `GET/PUT /api/v1/admin/mcp/settings`：读取或更新服务设置。
 - `GET/POST /api/v1/admin/mcp/keys`、`PATCH/DELETE /api/v1/admin/mcp/keys/{key_id}`：管理多个 Key；创建请求中的 `api_key` 只写入不返回。
 - `GET /api/v1/admin/mcp/keys/{key_id}/export-url`：管理员生成当前 Key 的 MCP 接入地址，用于复制到客户端配置。
-- `GET /api/v1/admin/mcp/logs`、`GET /api/v1/admin/mcp/logs/{id}`、`POST /api/v1/admin/mcp/logs/cleanup`：按 Key、IP、工具和结果查看或清理审计日志。
-- `GET /api/v1/admin/mcp/logs`：按页查询，可按工具名、成功状态、IP、起止时间筛选。
+- `GET /api/v1/admin/mcp/logs`：按页查询审计日志，可按工具名、成功状态、IP、Key 和起止时间筛选。
 - `GET /api/v1/admin/mcp/logs/{id}`：查看单条调用元数据详情。
 - `POST /api/v1/admin/mcp/logs/cleanup`：按当前保留期清理过期日志。
