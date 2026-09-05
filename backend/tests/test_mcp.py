@@ -4,6 +4,7 @@ import httpx
 import pytest
 
 from app.config import settings
+from app.mcp.auth import MCPAuthRateLimitMiddleware
 from app.mcp.server import delete_post, mcp, mcp_http_app, upload_image
 
 
@@ -133,3 +134,48 @@ async def test_mcp_host_allowlist(mcp_settings):
         assert response.status_code == 403
     finally:
         settings.MCP_ALLOWED_HOSTS = old_hosts
+
+
+@pytest.mark.no_db
+def test_mcp_body_limit_aligned_with_upload_size():
+    # mcp SDK 1.29+ 默认 4MiB 会拦截 5MB 图的 base64 请求体；必须与上传上限对齐
+    expected = ((settings.MAX_UPLOAD_SIZE + 2) // 3) * 4 + 64 * 1024
+    assert mcp.settings.max_request_body_size == expected
+    # 仍需低于网关 12m：应用层先拒绝并给出干净错误，网关兜底
+    assert mcp.settings.max_request_body_size < 12 * 1024 * 1024
+
+
+@pytest.mark.no_db
+@pytest.mark.asyncio
+async def test_mcp_request_body_size_boundary(mcp_settings):
+    below = 4 * 1024 * 1024 + 512 * 1024  # 4.5MB：旧默认 4MiB 下会被 413 拒绝
+    above = 10 * 1024 * 1024  # 10MB：超过新上限，必须被 SDK 中间件 413 拒绝
+    limit = mcp.settings.max_request_body_size
+    assert below < limit < above
+
+    # StreamableHTTPSessionManager.run() 每实例只允许一次，模块级 mcp_http_app 的
+    # manager 已被 test_mcp_auth_and_initialize 消费；这里基于同一 mcp 实例重建应用
+    # （携带相同 settings，含 max_request_body_size）获得独立的 manager，测试后还原。
+    original_manager = mcp._session_manager
+    mcp._session_manager = None
+    try:
+        app = mcp.streamable_http_app()
+        app.add_middleware(MCPAuthRateLimitMiddleware)
+        headers = {
+            "content-type": "application/json",
+            "accept": "application/json, text/event-stream",
+            "X-MCP-API-Key": "test-mcp-key",
+        }
+        with patch("app.mcp.auth.redis_client", mock_redis()):
+            transport = httpx.ASGITransport(app=app)
+            async with app.router.lifespan_context(app):
+                async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+                    # 4.5MB：穿过 RequestBodyLimitMiddleware，进入 JSON/协议处理（非法 JSON → 400）
+                    under = await client.post("/mcp", headers=headers, content=b"x" * below)
+                    assert under.status_code != 413
+                    assert under.status_code in (400, 406, 415)
+                    # 10MB：RequestBodyLimitMiddleware 依据 content-length 直接 413
+                    over = await client.post("/mcp", headers=headers, content=b"x" * above)
+                    assert over.status_code == 413
+    finally:
+        mcp._session_manager = original_manager
