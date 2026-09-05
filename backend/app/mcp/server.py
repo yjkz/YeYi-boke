@@ -49,6 +49,11 @@ mcp = FastMCP(
     json_response=True,
     host=settings.MCP_HOST,
     port=settings.MCP_PORT,
+    # mcp SDK 1.29+ 默认请求体上限 4MiB，会在应用层拦截 5MB 图片经 base64 膨胀后的请求体
+    # （约 6.7MB），必须与上传上限对齐：base64 膨胀后体积 + 64KB JSON 包络余量
+    # （MAX_UPLOAD_SIZE=5MB 时约 7.05MB，仍低于网关 12m，保持「应用层先拒绝并返回干净
+    # 错误、网关兜底」的层次）。
+    max_request_body_size=((settings.MAX_UPLOAD_SIZE + 2) // 3) * 4 + 64 * 1024,
 )
 
 READ = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
@@ -430,7 +435,7 @@ def decode_base64_payload(payload: str) -> bytes:
         f"({'/'.join(sorted(ALLOWED_IMAGE_EXTENSIONS))}); decoded content must be at most {settings.MAX_UPLOAD_SIZE} bytes. "
         "content_base64 accepts standard or URL-safe base64 with optional padding, embedded whitespace or newlines, "
         "and an optional data URI prefix (data:image/png;base64,...). The base64 text is about 4/3 of the decoded "
-        "size and must also fit the gateway request body limit."
+        "size; the server request body limit is sized to accommodate any payload within the upload limit."
     ),
     annotations=WRITE,
     structured_output=True,
