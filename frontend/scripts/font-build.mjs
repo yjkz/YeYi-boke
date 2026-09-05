@@ -72,3 +72,8 @@ console.log(
   `[font:build] total ${(total / 1024 / 1024).toFixed(2)} MB, largest chunk ${(max / 1024).toFixed(1)} KB`,
 );
 console.log(`[font:build] css -> ${path.relative(appRoot, cssTarget)}`);
+
+// cn-font-split 的原生内核（koffi FFI）在脚本工作全部完成后残留存活句柄，导致 Node 进程不退出
+// （Windows 上表现为退出时段错误，Linux 容器内表现为 RUN 挂死）。
+// 本脚本此前的所有写入均为同步 fs 且断言失败会先行 throw，走到这里即代表全部成功，强制退出安全。
+process.exit(0);
